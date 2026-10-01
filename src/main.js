@@ -13,6 +13,12 @@ const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 document.documentElement.classList.add('js');
 if (reduce) document.documentElement.classList.add('reduced');
 const page = document.body.dataset.page;
+
+// Opening intro: home page, once per browser session.
+let seenIntro = false;
+try { seenIntro = sessionStorage.getItem('intro') === '1'; sessionStorage.setItem('intro', '1'); } catch (e) { /* storage blocked */ }
+const showIntro = page === 'home' && !reduce && !seenIntro;
+const D = showIntro ? 2.5 : 0; // delay hero entrance until the curtain lifts
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const pad = (n) => String(n).padStart(2, '0');
@@ -533,7 +539,7 @@ if (page === 'photography') {
 if (!reduce) {
   // Hero entrance, staggered
   const heroBits = $$('.me [data-reveal], .page-hero [data-reveal], .p-hero [data-reveal]');
-  gsap.to(heroBits, { opacity: 1, y: 0, duration: 1.2, ease: 'expo.out', stagger: 0.09, delay: 0.1 });
+  gsap.to(heroBits, { opacity: 1, y: 0, duration: 1.2, ease: 'expo.out', stagger: 0.09, delay: 0.1 + D });
 
   ScrollTrigger.batch($$('[data-reveal]').filter((el) => !heroBits.includes(el)), {
     start: 'top 90%',
@@ -585,15 +591,15 @@ if (!reduce) {
 /* ---------- Personality: name, roles, cursor, previews ---------- */
 if (!reduce) {
   const nameLines = $$('.me-name .ln > span');
-  if (nameLines.length) gsap.from(nameLines, { yPercent: 110, duration: 1.4, ease: 'expo.out', stagger: 0.1, delay: 0.15 });
+  if (nameLines.length) gsap.from(nameLines, { yPercent: 110, duration: 1.4, ease: 'expo.out', stagger: 0.1, delay: 0.15 + D });
   const portrait = $('.me-frame');
-  if (portrait) gsap.from(portrait, { y: 60, rotate: 8, opacity: 0, duration: 1.6, ease: 'expo.out', delay: 0.3 });
+  if (portrait) gsap.from(portrait, { y: 60, rotate: 8, opacity: 0, duration: 1.6, ease: 'expo.out', delay: 0.3 + D });
 
   // Rotating role word
   const track = $('.rot-track');
   if (track) {
     const n = track.children.length - 1;
-    const tl = gsap.timeline({ repeat: -1, delay: 1.6 });
+    const tl = gsap.timeline({ repeat: -1, delay: 1.6 + D });
     for (let i = 1; i <= n; i++) tl.to(track, { yPercent: (-100 / (n + 1)) * i, duration: 0.7, ease: 'expo.inOut' }, '+=1.6');
     tl.set(track, { yPercent: 0 });
   }
@@ -643,6 +649,110 @@ if (finePointer && !reduce) {
       }
       pv.classList.add('is-on');
     } else pv.classList.remove('is-on');
+  });
+}
+
+/* ---------- Wow: intro curtain ---------- */
+if (showIntro) {
+  const intro = document.createElement('div');
+  intro.className = 'intro';
+  intro.setAttribute('aria-hidden', 'true');
+  intro.innerHTML = `<div class="intro-in">
+      <span class="intro-hi serif">Hi, I'm</span>
+      <div class="intro-name"><span>Yasar C H</span></div>
+      <div class="intro-stitch"><i></i><b></b></div>
+      <div class="intro-foot"><span>Fashion · Technology · Photography</span><span class="intro-count">000</span></div>
+    </div>`;
+  document.body.append(intro);
+  lenis?.stop();
+  const count = { v: 0 }, out = $('.intro-count', intro);
+  gsap.timeline({ onComplete: () => { intro.remove(); lenis?.start(); } })
+    .from('.intro-hi', { opacity: 0, y: 20, duration: 0.6, ease: 'expo.out' }, 0.1)
+    .from('.intro-name span', { yPercent: 110, duration: 1, ease: 'expo.out' }, 0.15)
+    .fromTo('.intro-stitch', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 1.5, ease: 'power2.inOut' }, 0.3)
+    .fromTo('.intro-stitch b', { left: '0%' }, { left: '100%', duration: 1.5, ease: 'power2.inOut' }, 0.3)
+    .to(count, { v: 100, duration: 1.5, ease: 'power2.inOut', onUpdate: () => (out.textContent = String(Math.round(count.v)).padStart(3, '0')) }, 0.3)
+    .to('.intro-in', { y: -40, opacity: 0, duration: 0.5, ease: 'power2.in' }, 1.95)
+    .to(intro, { clipPath: 'inset(0 0 100% 0)', duration: 0.9, ease: 'expo.inOut' }, 2.05);
+}
+
+/* ---------- Wow: living name, thread trail, magnetic buttons ---------- */
+if (finePointer && !reduce) {
+  // Split the hero name into letters whose weight follows the cursor
+  const name = $('.me-name');
+  if (name) {
+    $$('.ln > span', name).forEach((line) => {
+      const walk = (node) => [...node.childNodes].forEach((c) => {
+        if (c.nodeType === 3) {
+          const frag = document.createDocumentFragment();
+          [...c.textContent].forEach((ch) => {
+            const l = document.createElement('span');
+            l.className = ch === ' ' ? 'ch sp' : 'ch';
+            l.textContent = ch;
+            frag.append(l);
+          });
+          c.replaceWith(frag);
+        } else if (c.nodeType === 1) walk(c);
+      });
+      walk(line);
+    });
+    const letters = $$('.ch:not(.sp)', name).map((el) => ({ el, w: 600, target: 600 }));
+    let mx = -9999, my = -9999, active = false;
+    const hero = $('.me');
+    hero.addEventListener('pointermove', (e) => { mx = e.clientX; my = e.clientY; active = true; });
+    hero.addEventListener('pointerleave', () => { active = false; });
+    gsap.ticker.add(() => {
+      letters.forEach((l) => {
+        if (active) {
+          const r = l.el.getBoundingClientRect();
+          const d = Math.hypot(mx - (r.left + r.width / 2), my - (r.top + r.height / 2));
+          l.target = 300 + 600 * Math.max(0, 1 - d / 420);
+        } else l.target = 600;
+        const nw = l.w + (l.target - l.w) * 0.12;
+        if (Math.abs(nw - l.w) > 0.5) { l.w = nw; l.el.style.fontVariationSettings = `'wght' ${nw.toFixed(0)}`; }
+      });
+    });
+  }
+
+  // A fading stitch follows the cursor across the first screen
+  const hero = $('.me');
+  if (hero) {
+    const cv = document.createElement('canvas');
+    cv.className = 'trail';
+    hero.prepend(cv);
+    const ctx = cv.getContext('2d');
+    const pts = [];
+    const size = () => { const dpr = Math.min(devicePixelRatio, 2); cv.width = hero.clientWidth * dpr; cv.height = hero.clientHeight * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); };
+    size(); addEventListener('resize', size);
+    hero.addEventListener('pointermove', (e) => {
+      const r = hero.getBoundingClientRect();
+      pts.push({ x: e.clientX - r.left, y: e.clientY - r.top, t: performance.now() });
+    });
+    gsap.ticker.add(() => {
+      const now = performance.now();
+      while (pts.length && now - pts[0].t > 900) pts.shift();
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      if (pts.length < 2) return;
+      ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.setLineDash([9, 7]);
+      for (let i = 1; i < pts.length; i++) {
+        const a = pts[i - 1], b = pts[i];
+        ctx.strokeStyle = `rgba(58, 44, 245, ${Math.max(0, 1 - (now - b.t) / 900) * 0.85})`;
+        ctx.lineDashOffset = -i * 3;
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      }
+    });
+  }
+
+  // Magnetic buttons
+  $$('.btn, .wr-go, .next .go, .social, .rail-ctrl button').forEach((el) => {
+    const xTo = gsap.quickTo(el, 'x', { duration: 0.5, ease: 'power3' }), yTo = gsap.quickTo(el, 'y', { duration: 0.5, ease: 'power3' });
+    const host = el.closest('.work-row') || el;
+    host.addEventListener('pointermove', (e) => {
+      const r = el.getBoundingClientRect();
+      xTo((e.clientX - (r.left + r.width / 2)) * 0.3);
+      yTo((e.clientY - (r.top + r.height / 2)) * 0.3);
+    });
+    host.addEventListener('pointerleave', () => { xTo(0); yTo(0); });
   });
 }
 
