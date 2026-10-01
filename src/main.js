@@ -18,7 +18,7 @@ const page = document.body.dataset.page;
 let seenIntro = false;
 try { seenIntro = sessionStorage.getItem('intro') === '1'; sessionStorage.setItem('intro', '1'); } catch (e) { /* storage blocked */ }
 const showIntro = page === 'home' && !reduce && !seenIntro;
-const D = showIntro ? 2.5 : 0; // delay hero entrance until the curtain lifts
+const D = showIntro ? 3.4 : 0; // delay hero entrance until the curtain lifts
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const pad = (n) => String(n).padStart(2, '0');
@@ -652,28 +652,59 @@ if (finePointer && !reduce) {
   });
 }
 
-/* ---------- Wow: intro curtain ---------- */
+/* ---------- Wow: intro ---------- */
 if (showIntro) {
+  const words = ['Fashion', 'Technology', 'Photography'];
   const intro = document.createElement('div');
   intro.className = 'intro';
   intro.setAttribute('aria-hidden', 'true');
-  intro.innerHTML = `<div class="intro-in">
+  intro.innerHTML = `${'<span class="strip"></span>'.repeat(5)}
+    <div class="intro-cards"></div>
+    <div class="intro-words">${words.map((w) => `<div class="iw"><span>${w}<i>.</i></span></div>`).join('')}</div>
+    <div class="intro-in">
       <span class="intro-hi serif">Hi, I'm</span>
       <div class="intro-name"><span>Yasar C H</span></div>
-      <div class="intro-stitch"><i></i><b></b></div>
-      <div class="intro-foot"><span>Fashion · Technology · Photography</span><span class="intro-count">000</span></div>
-    </div>`;
+    </div>
+    <div class="intro-bar"><div class="intro-stitch"><i></i><b></b></div><div class="intro-foot"><span>Portfolio · ${new Date().getFullYear()}</span><span class="intro-count">000</span></div></div>`;
   document.body.append(intro);
   lenis?.stop();
+
+  // Real work images shuffle behind the words, but only ones that have actually loaded
+  const pool = [person.portrait, ...projects.map((p) => p.images[0]), ...garments.map((g) => g.cover), ...photos.slice(0, 4).map((p) => p.src)]
+    .map((src) => { const im = new Image(); im.src = src; return im; });
+  const cards = $('.intro-cards', intro);
+  let used = 0;
+  const dealCard = () => {
+    const im = pool.find((x, k) => k >= used && x.complete && x.naturalWidth);
+    if (!im) return;
+    used = pool.indexOf(im) + 1;
+    const c = document.createElement('div');
+    c.className = 'intro-card';
+    c.append(im);
+    cards.append(c);
+    gsap.fromTo(c, { yPercent: 60, scale: 0.7, rotate: gsap.utils.random(-14, 14), opacity: 0 },
+      { yPercent: 0, scale: 1, rotate: gsap.utils.random(-7, 7), opacity: 1, duration: 0.7, ease: 'expo.out' });
+  };
+
   const count = { v: 0 }, out = $('.intro-count', intro);
-  gsap.timeline({ onComplete: () => { intro.remove(); lenis?.start(); } })
-    .from('.intro-hi', { opacity: 0, y: 20, duration: 0.6, ease: 'expo.out' }, 0.1)
-    .from('.intro-name span', { yPercent: 110, duration: 1, ease: 'expo.out' }, 0.15)
-    .fromTo('.intro-stitch', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 1.5, ease: 'power2.inOut' }, 0.3)
-    .fromTo('.intro-stitch b', { left: '0%' }, { left: '100%', duration: 1.5, ease: 'power2.inOut' }, 0.3)
-    .to(count, { v: 100, duration: 1.5, ease: 'power2.inOut', onUpdate: () => (out.textContent = String(Math.round(count.v)).padStart(3, '0')) }, 0.3)
-    .to('.intro-in', { y: -40, opacity: 0, duration: 0.5, ease: 'power2.in' }, 1.95)
-    .to(intro, { clipPath: 'inset(0 0 100% 0)', duration: 0.9, ease: 'expo.inOut' }, 2.05);
+  const tl = gsap.timeline({ onComplete: () => { intro.remove(); lenis?.start(); } });
+  tl.fromTo('.intro-stitch', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 2.5, ease: 'power1.inOut' }, 0)
+    .fromTo('.intro-stitch b', { left: '0%' }, { left: '100%', duration: 2.5, ease: 'power1.inOut' }, 0)
+    .to(count, { v: 100, duration: 2.5, ease: 'power1.inOut', onUpdate: () => (out.textContent = String(Math.round(count.v)).padStart(3, '0')) }, 0)
+    .from('.intro-foot', { opacity: 0, duration: 0.4 }, 0);
+  gsap.set($$('.iw span', intro), { y: 0, yPercent: 110 });
+  $$('.iw span', intro).forEach((w, k) => {
+    const at = 0.1 + k * 0.5;
+    tl.call(dealCard, null, at)
+      .to(w, { yPercent: 0, duration: 0.45, ease: 'expo.out' }, at)
+      .to(w, { yPercent: -110, duration: 0.22, ease: 'power3.in' }, at + 0.28);
+  });
+  tl.call(dealCard, null, 1.6)
+    .to('.intro-card', { scale: 0.92, opacity: 0.35, filter: 'blur(6px)', duration: 0.6, ease: 'power2.out', stagger: 0.03 }, 1.65)
+    .from('.intro-hi', { opacity: 0, y: 24, duration: 0.6, ease: 'expo.out' }, 1.65)
+    .from('.intro-name span', { yPercent: 110, duration: 1, ease: 'expo.out' }, 1.7)
+    .to(['.intro-in', '.intro-bar', '.intro-cards'], { y: -50, opacity: 0, duration: 0.5, ease: 'power2.in' }, 2.75)
+    .to($$('.strip', intro), { yPercent: -100, duration: 0.85, ease: 'expo.inOut', stagger: { each: 0.07, from: 'center' } }, 2.9);
 }
 
 /* ---------- Wow: living name, thread trail, magnetic buttons ---------- */
