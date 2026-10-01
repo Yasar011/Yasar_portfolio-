@@ -519,3 +519,12 @@ section { position: relative; }
 .veil .pt-label { display: block; text-align: center; font-size: clamp(2.8rem, 9vw, 8rem); font-weight: 600; letter-spacing: -0.05em; line-height: 1.05; white-space: nowrap; }
 .veil:has(.pt-label) .veil-in { width: auto; max-width: 92vw; }
 .fl { display: inline-block; will-change: transform, filter; }
+
+/* Loader: the name is dyed */
+.dye { width: min(90vw, 1100px); }
+.dye-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.dye-svg text { font-family: var(--f-sans); font-weight: 700; font-size: 200px; letter-spacing: -10px; }
+.dye-outline { fill: none; stroke: rgba(241, 241, 244, 0.5); stroke-width: 1.4; }
+.dye-fill { fill: url(#dye-grad); }
+.dye .ld-meta { margin-top: 26px; }
+.veil:has(.dye) .veil-in { width: auto; }

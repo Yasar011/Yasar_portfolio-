@@ -688,45 +688,54 @@ function lift(el, at) {
 }
 
 if (showIntro) {
-  // Monoline "Y C H". Chrome restarts dashes at every subpath, so each stroke is its own path, sewn in order.
-  const STROKES = ['M24 18 L56 56 L88 18', 'M56 56 L56 94', 'M178 30 C160 12 122 16 120 56 C118 94 160 100 178 82', 'M212 18 L212 94', 'M212 56 L272 56', 'M272 18 L272 94'];
-  const ld = veil(`<div class="ld-in">
-      <svg class="mono" viewBox="0 0 296 112" aria-hidden="true">
-        <path class="mono-guide" d="${STROKES.join(' ')}"/>
-        ${STROKES.map((d) => `<path class="mono-stitch" d="${d}"/>`).join('')}
-        <g class="needle"><line x1="0" y1="-26" x2="0" y2="0"/><circle r="3.4"/></g>
+  // The full name is dyed: an outline first, then indigo rises through the letters with a moving wave on top
+  const W = 1200, H = 260, NAME = 'Yasar C H';
+  const wave = (() => {
+    // A wave twice the width so it can slide sideways forever, closed down to well below the letters
+    let d = `M0 0`;
+    for (let x = 0; x <= W * 2; x += 60) d += ` Q${x + 30} ${(x / 60) % 2 ? 14 : -14} ${x + 60} 0`;
+    return `${d} L${W * 2 + 60} ${H * 2} L0 ${H * 2} Z`;
+  })();
+  const ld = veil(`<div class="dye">
+      <svg class="dye-svg" viewBox="0 0 ${W} ${H}" aria-hidden="true">
+        <defs><clipPath id="dye-clip"><path class="dye-wave" d="${wave}"/></clipPath>
+          <linearGradient id="dye-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a91ff"/><stop offset="1" stop-color="#3a2cf5"/></linearGradient></defs>
+        <text class="dye-outline" x="${W / 2}" y="${H * 0.78}" text-anchor="middle">${NAME}</text>
+        <g clip-path="url(#dye-clip)"><text class="dye-fill" x="${W / 2}" y="${H * 0.78}" text-anchor="middle">${NAME}</text></g>
       </svg>
-      <div class="ld-meta"><span class="ld-status">Threading the needle</span><span class="ld-count">000</span></div>
-      <p class="ld-name">Yasar C H <span>· Fashion · Technology · Photography</span></p>
+      <div class="ld-meta"><span class="ld-status">Weaving</span><span class="ld-count">000</span></div>
+      <p class="ld-name">Fashion Technology · NIFT Jodhpur <span>· Portfolio ${new Date().getFullYear()}</span></p>
     </div>`, true);
   lenis?.stop();
 
-  const strokes = $$('.mono-stitch', ld), needle = $('.needle', ld), status = $('.ld-status', ld), count = $('.ld-count', ld);
-  const lens = strokes.map((el) => el.getTotalLength()), L = lens.reduce((a, b) => a + b, 0);
-  const stages = [[0, 'Cutting the pattern'], [0.22, 'Stitching'], [0.82, 'Pressing'], [0.97, 'Ready']];
+  const svg = $('.dye-svg', ld), waveEl = $('.dye-wave', ld), status = $('.ld-status', ld), count = $('.ld-count', ld);
+  // Fit the viewBox to the real text once the face is ready, so the name always fills the width
+  const fit = () => {
+    const b = $('.dye-outline', ld).getBBox();
+    if (b.width) svg.setAttribute('viewBox', `${b.x - 10} ${b.y - 10} ${b.width + 20} ${b.height + 20}`);
+  };
+  fit();
+  document.fonts?.ready.then(fit);
+
+  const stages = [[0, 'Weaving'], [0.18, 'Dyeing'], [0.86, 'Finishing'], [0.98, 'Ready']];
   const prog = { p: 0 };
   const render = () => {
     const p = prog.p;
-    // Hand out the sewn length stroke by stroke; the needle sits at the tip
-    let left = p * L, tip = null;
-    lens.forEach((len, i) => {
-      const sewn = Math.max(0, Math.min(len, left)); left -= len;
-      const full = Math.floor(sewn / 16), rest = sewn - full * 16;
-      strokes[i].style.strokeDasharray = sewn <= 0 ? `0 ${len + 20}` : `${'9 7 '.repeat(full)}${Math.min(9, rest).toFixed(2)} ${(len + 20).toFixed(0)}`;
-      strokes[i].style.opacity = sewn > 0 ? 1 : 0;
-      if (sewn > 0) tip = strokes[i].getPointAtLength(sewn);
-    });
-    const bob = p < 1 ? Math.sin(performance.now() / 38) * 4 : 0;
-    if (tip) needle.setAttribute('transform', `translate(${tip.x} ${tip.y + bob})`);
+    // Dye level: from below the baseline to above the cap height
+    const level = H * 0.92 - p * H * 0.92;
+    const drift = -((performance.now() / 6) % 120);
+    waveEl.setAttribute('transform', `translate(${drift} ${level})`);
     count.textContent = String(Math.round(p * 100)).padStart(3, '0');
     const st = stages.filter(([at]) => p >= at).pop()[1];
     if (status.textContent !== st) status.textContent = st;
   };
+  render();
 
-  lift(ld, 2.25)
-    .from($('.ld-in', ld), { opacity: 0, y: 20, filter: 'blur(6px)', duration: 0.7, ease: 'expo.out' }, 0)
-    .to(prog, { p: 1, duration: 2, ease: 'power1.inOut', onUpdate: render }, 0.15)
-    .to(needle, { opacity: 0, duration: 0.25 }, 2.1);
+  lift(ld, 2.35)
+    .from($('.dye', ld), { opacity: 0, y: 24, filter: 'blur(8px)', duration: 0.8, ease: 'expo.out' }, 0)
+    .fromTo($('.dye-outline', ld), { strokeDasharray: '0 1200' }, { strokeDasharray: '1200 0', duration: 1.1, ease: 'power2.inOut' }, 0)
+    .to(prog, { p: 1, duration: 1.95, ease: 'power1.inOut', onUpdate: render }, 0.3)
+    .to($('.dye-fill', ld), { attr: { fill: '#ffffff' }, duration: 0.35, ease: 'power1.out' }, 2.05);
 }
 
 // Arriving from another page: the silk that covered the old page lifts off this one
