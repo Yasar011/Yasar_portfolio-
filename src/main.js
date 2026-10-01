@@ -5,6 +5,7 @@ import Lenis from 'lenis';
 import {
   person, projects, garments, photos, photoCategories, camera,
   education, experience, events, certificates, recommendations, skills,
+  focusAreas, tools, languages,
 } from './data.js';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -22,6 +23,8 @@ const icon = {
   arrow: sv('<path d="M5 12h14M13 6l6 6-6 6"/>'),
   arrowL: sv('<path d="M19 12H5M11 6l-6 6 6 6"/>'),
   out: sv('<path d="M7 17 17 7M9 7h8v8"/>'),
+  download: sv('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>'),
+  mail: sv('<rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/>', 1.6),
   chev: sv('<path d="m9 6 6 6-6 6"/>'),
   close: sv('<path d="M6 6l12 12M18 6 6 18"/>'),
   camera: sv('<path d="M3 8.5A1.5 1.5 0 0 1 4.5 7h2.6l1.4-2h7l1.4 2h2.6A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5z"/><circle cx="12" cy="13" r="3.6"/>', 1.5),
@@ -50,7 +53,7 @@ function wireMedia(root = document) {
 }
 
 /* ---------- Shared chrome ---------- */
-const links = [['Work', '/work'], ['Garments', '/garments'], ['Photography', '/photography'], ['About', '/about']];
+const links = [['Work', '/work'], ['Garments', '/garments'], ['Photography', '/photography'], ['About', '/about'], ['CV', '/cv']];
 const here = (h) => {
   const p = location.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/';
   return p === h || (h === '/work' && page === 'project');
@@ -63,12 +66,13 @@ function chrome() {
   nav.innerHTML = `<div class="wrap">
     <a class="brand" href="/" aria-label="Yasar C H — home"><span class="brand-mark">y</span>Yasar C H</a>
     <nav aria-label="Main"><ul class="nav-links">${links.map(([l, h]) => `<li><a href="${h}"${here(h) ? ' aria-current="page"' : ''}>${l}</a></li>`).join('')}</ul></nav>
-    <a class="btn nav-cta" href="#contact">Get in touch</a>
+    <a class="btn nav-cta" href="${person.cv}" download>${icon.download} Download CV</a>
     <button class="menu-btn" aria-label="Open menu" aria-expanded="false" aria-controls="drawer"><span></span></button>
   </div>`;
   const drawer = document.createElement('div');
   drawer.className = 'drawer'; drawer.id = 'drawer';
   drawer.innerHTML = `<ol>${[['Home', '/'], ...links, ['Contact', '#contact']].map(([l, h]) => `<li><a href="${h}">${l}</a></li>`).join('')}</ol>
+    <a class="btn" href="${person.cv}" download style="align-self:flex-start;margin-top:24px">${icon.download} Download CV</a>
     <div class="drawer-foot">${person.socials.map((s) => `<a href="${s.href}" target="_blank" rel="noopener">${s.label}</a>`).join('')}</div>`;
   const thread = document.createElement('div');
   thread.className = 'thread'; thread.setAttribute('aria-hidden', 'true');
@@ -91,7 +95,7 @@ function chrome() {
   foot.innerHTML = `<div class="wrap">
     <h2 class="t-hero" data-reveal>Let's make<br>something <span class="serif">good.</span></h2>
     <p class="lede" data-reveal>Internships, collaborations, shoots or a factory floor that still runs on paper — I'd love to hear about it.</p>
-    <div class="ctas" data-reveal><a class="btn" href="${person.socials[1].href}" target="_blank" rel="noopener">Message me on LinkedIn ${icon.out}</a></div>
+    <div class="ctas" data-reveal><a class="btn" href="mailto:${person.email}">${icon.mail} ${person.email}</a><a class="link" href="${person.cv}" download><span>Download my CV</span>${icon.download}</a></div>
     <div class="socials" data-reveal>${person.socials.map((s) => `<a class="social" href="${s.href}" target="_blank" rel="noopener"><i>${socialIcon[s.label]}</i><span><b>${s.label}</b><span>@${s.handle}</span></span></a>`).join('')}</div>
     <div class="foot-base"><span>© ${new Date().getFullYear()} Yasar C H · ${person.signoff}</span><a href="#top">Back to top ↑</a></div>
   </div>`;
@@ -113,7 +117,7 @@ function home() {
       <div class="who" data-reveal><span class="avatar">y<img src="${person.portrait}" alt="" onerror="this.remove()"></span><span><b>Yasar C H</b> · BFT, ${person.school}</span></div>
       <h1 class="t-hero" data-reveal>Fashion, <span class="serif">engineered.</span></h1>
       <p class="lede" data-reveal>I build real-time systems for apparel factories, make garments by hand, and photograph the people who wear them.</p>
-      <div class="ctas" data-reveal><a class="btn" href="/work">See my work ${icon.arrow}</a><a class="link" href="#contact"><span>Get in touch</span>${icon.arrow}</a></div>
+      <div class="ctas" data-reveal><a class="btn" href="/work">See my work ${icon.arrow}</a><a class="link" href="${person.cv}" download><span>Download CV</span>${icon.download}</a></div>
     </div>
     <div class="wrap hero-stage">
       <div class="inner" data-reveal>
@@ -300,6 +304,13 @@ function photography() {
   </div>`;
 }
 
+const experienceList = () => `<ol class="timeline">${experience.map((x) => `<li data-reveal><div><span class="when">${x.when}</span><h3>${x.org}</h3><p class="role">${x.role}</p></div>
+      <div><p>${x.body}</p>${tags(x.tags)}</div></li>`).join('')}</ol>`;
+const educationList = () => `<ol class="timeline">${education.map((e) => `<li data-reveal><div>${e.years ? `<span class="when">${e.years}</span>` : ''}<h3>${e.place}</h3></div>
+      <div><p style="margin:0">${e.what}</p>${e.now ? `<p class="dim" style="margin:6px 0 0">${e.now}</p>` : ''}</div></li>`).join('')}</ol>`;
+const certList = () => `<div class="cert-grid">${certificates.map((c) => `<div class="cert" data-reveal><span class="ico">${icon.award}</span><div><h3>${c.title}</h3><p>${c.detail}</p></div></div>`).join('')}</div>`;
+const skillList = () => `<div class="skills">${skills.map((s) => `<div class="skill-row" data-reveal><h3>${s.group}</h3>${tags(s.items)}</div>`).join('')}</div>`;
+
 function about() {
   return `
   <section class="page-hero"><div class="wrap">
@@ -316,13 +327,13 @@ function about() {
         <div><dt>Institute</dt><dd>${person.school}, ${person.years}</dd></div>
         <div><dt>Currently</dt><dd>${person.semester}</dd></div>
       </dl>
+      <div class="ctas" style="margin-top:28px" data-reveal><a class="btn" href="${person.cv}" download>${icon.download} Download CV</a><a class="link" href="/cv"><span>Read the full CV</span>${icon.arrow}</a></div>
     </div>
   </div></section>
 
   <section class="sec on-white"><div class="wrap">
     <div class="head"><h2 class="t-1" data-reveal>Experience.</h2></div>
-    <ol class="timeline">${experience.map((x) => `<li data-reveal><div><span class="when">${x.when}</span><h3>${x.org}</h3><p class="role">${x.role}</p></div>
-      <div><p>${x.body}</p>${tags(x.tags)}</div></li>`).join('')}</ol>
+    ${experienceList()}
   </div></section>
 
   <section class="on-night sec-s center"><div class="wrap">
@@ -332,8 +343,7 @@ function about() {
 
   <section class="sec"><div class="wrap">
     <div class="head"><h2 class="t-1" data-reveal>Education.</h2></div>
-    <ol class="timeline">${education.map((e) => `<li data-reveal><div>${e.years ? `<span class="when">${e.years}</span>` : ''}<h3>${e.place}</h3></div>
-      <div><p style="margin:0">${e.what}</p>${e.now ? `<p class="dim" style="margin:6px 0 0">${e.now}</p>` : ''}</div></li>`).join('')}</ol>
+    ${educationList()}
   </div></section>
 
   <section class="sec" style="padding-top:0"><div class="wrap">
@@ -344,17 +354,78 @@ function about() {
 
   <section class="sec" style="padding-top:0"><div class="wrap">
     <div class="head"><h2 class="t-1" data-reveal>Certificates.</h2></div>
-    <div class="cert-grid">${certificates.map((c) => `<div class="cert" data-reveal><span class="ico">${icon.award}</span><div><h3>${c.title}</h3><p>${c.detail}</p></div></div>`).join('')}</div>
+    ${certList()}
   </div></section>
 
   <section class="sec" style="padding-top:0"><div class="wrap">
     <div class="head"><h2 class="t-1" data-reveal>Expertise.</h2></div>
-    <div class="skills">${skills.map((s) => `<div class="skill-row" data-reveal><h3>${s.group}</h3>${tags(s.items)}</div>`).join('')}</div>
+    ${skillList()}
+  </div></section>`;
+}
+
+function cv() {
+  return `
+  <section class="page-hero"><div class="wrap">
+    ${crumbs('CV')}
+    <h1 class="t-hero" data-reveal>My <span class="serif">résumé.</span></h1>
+    <p class="lede" data-reveal>Everything on one page: education, experience, skills and tools. Read it here, or take the PDF with you.</p>
+    <div class="ctas" style="margin-top:36px" data-reveal>
+      <a class="btn" href="${person.cv}" download>${icon.download} Download CV (PDF)</a>
+      <a class="link" href="${person.cv}" target="_blank" rel="noopener"><span>Open in a new tab</span>${icon.out}</a>
+    </div>
+  </div></section>
+
+  <section style="padding-bottom:clamp(80px,10vw,140px)"><div class="wrap">
+    <dl class="kv cv-glance">
+      <div data-reveal><dt>Programme</dt><dd>${person.degree} (BFT)</dd></div>
+      <div data-reveal><dt>Institute</dt><dd>${person.school} · ${person.years}</dd></div>
+      <div data-reveal><dt>Minor</dt><dd>${person.minor}</dd></div>
+      <div data-reveal><dt>From</dt><dd>${person.location}</dd></div>
+      <div data-reveal><dt>Languages</dt><dd>${languages.join(', ')}</dd></div>
+      <div data-reveal><dt>Email</dt><dd><a class="accent" href="mailto:${person.email}">${person.email}</a></dd></div>
+    </dl>
+    <p class="bio cv-summary" data-reveal>${person.about}</p>
+  </div></section>
+
+  <section class="sec on-white"><div class="wrap">
+    <div class="head"><h2 class="t-1" data-reveal>Experience.</h2></div>
+    ${experienceList()}
+  </div></section>
+
+  <section class="sec"><div class="wrap">
+    <div class="head"><h2 class="t-1" data-reveal>Education.</h2></div>
+    ${educationList()}
+  </div></section>
+
+  <section class="on-night sec center"><div class="wrap">
+    <h2 class="t-1" data-reveal>What I <span class="serif">do.</span></h2>
+    <div class="events" data-reveal>${focusAreas.map((f) => `<span>${f}</span>`).join('')}</div>
+  </div></section>
+
+  <section class="sec"><div class="wrap">
+    <div class="head"><h2 class="t-1" data-reveal>Software <span class="serif">&amp;</span> tools.</h2></div>
+    <div class="tool-grid">${tools.map((t) => `<div class="tool" data-reveal>${t}</div>`).join('')}</div>
+  </div></section>
+
+  <section class="sec" style="padding-top:0"><div class="wrap">
+    <div class="head"><h2 class="t-1" data-reveal>Skills.</h2></div>
+    ${skillList()}
+  </div></section>
+
+  <section class="sec" style="padding-top:0"><div class="wrap">
+    <div class="head"><h2 class="t-1" data-reveal>Certificates.</h2></div>
+    ${certList()}
+  </div></section>
+
+  <section class="sec on-white cv-preview-sec"><div class="wrap">
+    <div class="head"><div><h2 class="t-1" data-reveal>The one-page <span class="serif">version.</span></h2><p class="lede" data-reveal>The same CV as a PDF, ready to print or attach.</p></div>
+      <a class="btn" href="${person.cv}" download data-reveal>${icon.download} Download CV</a></div>
+    <div class="cv-frame" data-reveal><iframe src="${person.cv}#view=FitH&toolbar=0" title="Yasar C H — CV (PDF)" loading="lazy"></iframe></div>
   </div></section>`;
 }
 
 /* ---------- Render ---------- */
-const views = { home, work, project, garments: garmentsPage, photography, about };
+const views = { home, work, project, garments: garmentsPage, photography, about, cv };
 $('#main').innerHTML = views[page]?.() ?? '';
 let lenis = null;
 chrome();

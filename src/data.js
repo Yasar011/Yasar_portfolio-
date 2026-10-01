@@ -12,6 +12,9 @@ export const person = {
   about:
     'I am a Bachelor of Fashion Technology student at NIFT Jodhpur, interested in combining fashion, technology, digital development and visual storytelling. I enjoy building digital systems, exploring AI-assisted development, working with technology in manufacturing, creating visual content, and managing creative projects and events.',
   signoff: 'Building at the intersection of Fashion, Technology & Visual Storytelling.',
+  email: 'chyasar2004@gmail.com',
+  location: 'Perinthalmanna, Kerala · NIFT Jodhpur',
+  cv: '/Yasar_CH_CV.pdf',
   portrait: '/images/portrait.jpg',
   portraitAlt: '/images/portrait-2.jpg',
   socials: [
@@ -180,41 +183,45 @@ export const photos = [
 export const camera = { body: 'Nikon Z6 II', lens: 'NIKKOR Z 24–70mm f/4 S' };
 
 export const education = [
-  { years: '2023–2027', place: 'NIFT Jodhpur', what: 'Bachelor of Fashion Technology (BFT), Major · Minor: Communication Design', now: 'Currently in BFT-7' },
-  { years: '', place: 'Technical Higher Secondary School', what: 'Class 12 · Higher Secondary', now: 'Under Indian Human Resource Development' },
-  { years: '', place: 'Aliya English Medium High School', what: 'Class 10 · Secondary School', now: '' },
+  { years: '2023–2027', place: 'National Institute of Fashion Technology (NIFT), Jodhpur', what: 'Bachelor of Fashion Technology (BFT) · Minor: Communication Design', now: 'Currently in BFT-7' },
+  { years: '2021–2023', place: 'Technical Higher Secondary School', what: 'Higher Secondary · Physical Science', now: 'Under Indian Human Resource Development' },
+  { years: '2010–2021', place: 'Aliya English Medium High School', what: 'Secondary School', now: '' },
 ];
 
 export const experience = [
   {
     org: 'Brandix Apparel India Pvt. Ltd.',
     role: 'Apparel Internship · Unit-III, Visakhapatnam',
-    when: '01 June – 24 July 2026 · 8 weeks',
-    body: 'Quality management, process automation and human-resource analytics. Built QMS, APMS and HRMMS during the internship.',
-    tags: ['QMS', 'APMS', 'HRMMS'],
+    when: 'June – July 2026 · 8 weeks',
+    body: 'Worked on the QMS, APMS and HRMMS projects. Analysed quality workflows, problem reporting, manpower planning, operational performance monitoring and digital transformation initiatives.',
+    tags: ['Quality Management', 'Process Automation', 'HR Analytics'],
   },
   {
     org: 'Arvind Limited',
-    role: 'Textile Manufacturing Training',
-    when: '16 – 30 June 2025',
-    body: 'Hands-on training across woven and knit textile manufacturing.',
+    role: 'Textile Manufacturing Training · Ahmedabad',
+    when: 'June 2025 · 16–30 June',
+    body: 'Gained hands-on experience in textile manufacturing and production processes across wovens and knits.',
     tags: ['Wovens', 'Knits'],
   },
   {
     org: 'TEDxNIFT Jodhpur',
     role: 'Website Designer & Developer',
-    when: 'Event platform',
-    body: 'Website, volunteer system, seat selection, digital ticketing, My Tickets, database, Cloudinary, testing and deployment.',
-    tags: ['Web', 'Firebase', 'Cloudinary'],
+    when: 'November 2025',
+    body: 'Designed and developed the digital platform using vibe coding and AI-assisted development: website, volunteer system, seat selection, digital ticketing, My Tickets and Cloudinary.',
+    tags: ['Website', 'Volunteer System', 'Digital Ticketing', 'Cloudinary'],
   },
   {
     org: 'Adventure & Photography Club, NIFT Jodhpur',
     role: 'President',
-    when: '2026–27',
-    body: 'Leadership, event planning, team management, photography, creative direction, trip planning and club activities.',
-    tags: ['Leadership', 'Photography'],
+    when: '2026–2027',
+    body: 'Led the club, organised events, planned trips and managed team activities.',
+    tags: ['Leadership', 'Event Planning', 'Team Management', 'Photography', 'Creative Direction', 'Trip Planning'],
   },
 ];
+
+export const focusAreas = ['Web Development', 'UI/UX Design', 'Photography', 'Video Editing', 'Fashion Technology'];
+export const tools = ['HTML / CSS / JavaScript', 'Firebase', 'GitHub', 'Vercel', 'Canva', 'Adobe Photoshop', 'Adobe Illustrator', 'Adobe Lightroom', 'Adobe Premiere Pro', 'Microsoft Office'];
+export const languages = ['Malayalam', 'English', 'Hindi'];
 
 export const events = ['TEDxNIFT Jodhpur', 'Spectrum 2026 — VIBHRAM', 'Adventure & Photography Club'];
 
@@ -233,7 +240,7 @@ export const recommendations = [
 export const skills = [
   { group: 'Digital & Technology', items: ['HTML', 'CSS', 'JavaScript', 'Firebase', 'Vercel', 'Cloudinary', 'GitHub', 'Web Development', 'AI Tools', 'Vibe Coding', 'n8n'] },
   { group: 'Fashion Tech & Manufacturing', items: ['TukaTech', 'TukaCard', 'FastReact', 'TimeSSD', 'Digital Quality Systems', 'Industrial IoT', 'Process Automation'] },
-  { group: 'Creative & Design', items: ['Canva', 'Photoshop', 'Illustrator', 'Premiere Pro', 'After Effects', 'Blender', 'Excel', 'PowerPoint'] },
+  { group: 'Creative & Design', items: ['Canva', 'Photoshop', 'Illustrator', 'Lightroom', 'Premiere Pro', 'After Effects', 'Blender', 'Excel', 'PowerPoint'] },
   { group: 'Photography', items: ['Fashion', 'Portrait', 'Event', 'Travel', 'Photo Editing'] },
   { group: 'Management & Leadership', items: ['Event Management', 'Team Management', 'Project Management', 'Leadership', 'Creative Direction'] },
 ];

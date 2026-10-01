@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'node:path';
 
-const pages = ['index', 'work', 'project', 'garments', 'photography', 'about'];
+const pages = ['index', 'work', 'project', 'garments', 'photography', 'about', 'cv'];
 
 export default defineConfig({
   appType: 'mpa',
