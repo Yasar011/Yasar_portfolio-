@@ -213,12 +213,10 @@ export const garments = [
 export const photoCategories = ['Fashion', 'Portrait', 'Event', 'Travel', 'Creative'];
 
 const p = (cat, n, ratio) => ({ cat, src: `/images/photography/${cat.toLowerCase()}-${String(n).padStart(2, '0')}.jpg`, ratio });
+// Only real photos go here. Add a file to /public/images/photography and a line below.
 export const photos = [
-  p('Fashion', 1, '4/5'), p('Portrait', 1, '4/5'), p('Event', 1, '3/2'),
-  p('Travel', 1, '3/2'), p('Fashion', 2, '2/3'), p('Creative', 1, '1/1'),
-  p('Portrait', 2, '2/3'), p('Event', 2, '3/2'), p('Fashion', 3, '4/5'),
-  p('Travel', 2, '2/3'), p('Portrait', 3, '4/5'), p('Event', 3, '4/5'),
-  p('Travel', 3, '3/2'), p('Fashion', 4, '3/2'), p('Creative', 2, '4/5'),
+  p('Fashion', 1, '3/2'),
+  p('Fashion', 2, '2/3'),
 ];
 
 export const camera = { body: 'Nikon Z6 II', lens: 'NIKKOR Z 24–70mm f/4 S' };

@@ -126,12 +126,13 @@ const services = [
 const tickMark = '<svg class="tick-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
 
 function home() {
+  // Real photos lead (first one large), then a garment; more photos join as they are added
+  const shots = photos.map((ph) => ({ src: ph.src, label: `${ph.cat} photography`, href: '/photography' }));
   const madeShot = [
+    ...(shots[0] ? [{ ...shots[0], cls: 'big' }] : []),
+    ...(shots[1] ? [{ ...shots[1], cls: 'tall' }] : []),
     { src: garments[0].cover, label: garments[0].title, href: '/garments', cls: 'tall' },
-    { src: photos[0].src, label: 'Fashion photography', href: '/photography' },
-    { src: photos[1].src, label: 'Portrait', href: '/photography' },
-    { src: garments[1].cover, label: garments[1].title, href: '/garments', cls: 'tall' },
-    { src: photos[2].src, label: 'Event', href: '/photography', cls: 'wide' },
+    ...shots.slice(2, 6),
   ];
   return `
   <section class="me" id="top"><div class="wrap me-grid">
@@ -296,7 +297,7 @@ function garmentsPage() {
 }
 
 function photography() {
-  const cats = ['All', ...photoCategories];
+  const cats = ['All', ...photoCategories.filter((c) => photos.some((ph) => ph.cat === c))];
   return `
   <section class="page-hero"><div class="wrap">
     ${crumbs('Photography')}
@@ -308,7 +309,7 @@ function photography() {
       <div class="seg" role="tablist" aria-label="Filter photos">${cats.map((c, i) => `<button role="tab" aria-selected="${i === 0}" data-cat="${c}">${c}</button>`).join('')}<span class="pill" aria-hidden="true"></span></div>
       <div class="tags"><span class="tag" style="background:var(--surface)">${camera.body}</span><span class="tag" style="background:var(--surface)">${camera.lens}</span></div>
     </div>
-    <div class="masonry">${photos.map((ph, i) => `<button class="shot" data-cat="${ph.cat}" data-i="${i}" aria-label="Open ${ph.cat} photo">${media(ph.src, { ratio: ph.ratio, alt: `${ph.cat} photograph` })}<span class="cap">${ph.cat}</span></button>`).join('')}</div>
+    <div class="masonry" style="columns:${Math.min(3, photos.length)} 300px">${photos.map((ph, i) => `<button class="shot" data-cat="${ph.cat}" data-i="${i}" aria-label="Open ${ph.cat} photo">${media(ph.src, { ratio: ph.ratio, alt: `${ph.cat} photograph` })}<span class="cap">${ph.cat}</span></button>`).join('')}</div>
   </div></section>
   <div class="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
     <div class="lb-bar"><span class="mono lb-count"></span><button class="lb-btn lb-close" aria-label="Close">${icon.close}</button></div>
