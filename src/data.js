@@ -51,6 +51,16 @@ export const projects = [
       ['Changeover tracking', 'Production style changeovers are logged and timed alongside breakdowns.'],
       ['Works like an app', 'Installable PWA that runs on the phones already on the floor.'],
     ],
+    flow: [
+      { label: 'Report', nodes: [{ t: 'Scan machine QR', d: 'Every machine carries a QR code. The operator scans it on the floor, with no login needed.' }] },
+      { label: 'Ticket', nodes: [{ t: 'Raise the problem', d: 'Breakdown or changeover, with priority and a short description.' }] },
+      { label: 'Live data', hub: true, nodes: [{ t: 'Firebase Realtime DB', d: 'Machine status, tickets and every timestamp, synced live to all screens.' }] },
+      { label: 'Routing', nodes: [{ t: 'Mechanical' }, { t: 'Technical' }, { t: 'IE' }, { t: 'Quality' }] },
+      { label: 'Fix', nodes: [{ t: 'Technician app', d: 'Push alert → accept → fix with a running timer → close or escalate.' }, { t: 'Spare parts', d: 'Part requests go to stores for approval and issue.' }] },
+      { label: 'Oversight', nodes: [{ t: 'Admin & factory manager', d: 'Open tickets, techs online, repair logs, PM due, reports; machines, modules and transfers.' }] },
+    ],
+    live: 'https://garment-fix.vercel.app/',
+    repo: 'https://github.com/Yasar011/GarmentFix',
     images: ['/images/projects/apms-1.jpg', '/images/projects/apms-2.jpg', '/images/projects/apms-3.jpg'],
   },
   {
@@ -65,7 +75,7 @@ export const projects = [
       'Quality checks lived on paper. Each shift produced stacks of inspection sheets that someone re-typed for hours, and management saw the numbers six hours late.',
     solution:
       'Inspectors log end-line, roving and third-party checks directly on a device. Defects flow into live analytics, repeat offenders are flagged automatically, and reports are ready the moment the data lands.',
-    stack: ['Real-time database', 'Analytics', 'AMMS integration', 'AI-assisted analysis'],
+    stack: ['JavaScript', 'Firebase Realtime Database', 'QR Code', 'PWA', 'Groq AI', 'AMMS integration'],
     impact: [
       { from: '70–80', to: '0', label: 'paper sheets per shift' },
       { from: '3–4 h', to: '0', label: 'manual re-entry per day' },
@@ -81,6 +91,15 @@ export const projects = [
       ['Reports Hub', 'Shift and day reports generated instantly.'],
       ['AMMS + AI analysis', 'Linked with the maintenance system, with AI-assisted analysis of trends.'],
     ],
+    flow: [
+      { label: 'Setup', nodes: [{ t: 'Admin configures', d: 'Styles, operations, defect library, line rosters and rotation.' }] },
+      { label: 'Inspect', nodes: [{ t: 'End Line', d: 'Final check, garment by garment.' }, { t: 'Roving', d: 'In-line spot checks by operator.' }, { t: '3rd Party', d: 'Independent audit stage.' }] },
+      { label: 'Live data', hub: true, nodes: [{ t: 'Firebase Realtime DB', d: 'Inspections, defects and rework written the moment they happen.' }] },
+      { label: 'Act', nodes: [{ t: 'Red Operator detection', d: 'Flags operators repeating the same defect.' }, { t: 'Approvals hub', d: 'Floor edit requests reviewed by admin.' }, { t: 'AMMS ticket', d: 'Machine-caused defects go to maintenance.' }] },
+      { label: 'Report', nodes: [{ t: 'QMS admin dashboard', d: 'Defect analytics, operator analysis, module, style and shift reports, corrective actions.' }] },
+      { label: 'Insight', nodes: [{ t: 'QMS Bot (AI)', d: 'Groq-powered analysis that explains trends and answers questions about quality.' }] },
+    ],
+    repo: 'https://github.com/Yasar011/GarmentFix',
     images: ['/images/projects/qms-1.jpg', '/images/projects/qms-2.jpg', '/images/projects/qms-3.jpg'],
   },
   {

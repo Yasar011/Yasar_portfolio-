@@ -221,7 +221,7 @@ function project() {
     ${crumbs(['Work', '/work'], p.title)}
     <h1 class="t-hero" data-reveal>${p.title}</h1>
     <p class="lede" data-reveal>${p.summary}</p>
-    ${p.live ? `<div class="ctas" style="margin-top:30px" data-reveal><a class="btn" href="${p.live}" target="_blank" rel="noopener">Visit live site ${icon.out}</a></div>` : ''}
+    ${p.live || p.repo ? `<div class="ctas" style="margin-top:30px" data-reveal>${p.live ? `<a class="btn" href="${p.live}" target="_blank" rel="noopener">Visit live site ${icon.out}</a>` : ''}${p.repo ? `<a class="btn btn--line" href="${p.repo}" target="_blank" rel="noopener">${icon.github} View code</a>` : ''}</div>` : ''}
   </div>
   <div class="wrap p-stage" data-reveal><div class="grow">${media(p.images[0], { ratio: '16/9', alt: `${p.title} main screen`, eager: true })}</div></div></section>
 
@@ -237,6 +237,14 @@ function project() {
     <div data-reveal><h2 class="t-2">The <span class="serif">problem.</span></h2><p>${p.problem}</p></div>
     <div data-reveal><h2 class="t-2">What I <span class="serif">built.</span></h2><p>${p.solution}</p></div>
   </div></section>
+
+  ${p.flow ? `<section class="sec-s flow-sec"><div class="wrap">
+    <div class="head"><div><h2 class="t-1" data-reveal>How it <span class="serif">works.</span></h2><p class="lede" data-reveal>The system as one flow, from the factory floor to the dashboard.</p></div></div>
+    <div class="flow" data-flow>${p.flow.map((st, i) => `<div class="flow-col${st.hub ? ' is-hub' : ''}${st.nodes.length > 1 ? ' is-fork' : ''}" data-reveal>
+      <span class="flow-label mono"><b>${pad(i + 1)}</b> ${st.label}</span>
+      ${st.nodes.map((n) => `<div class="flow-node"><h3>${n.t}</h3>${n.d ? `<p>${n.d}</p>` : ''}</div>`).join('')}
+    </div>${i < p.flow.length - 1 ? '<span class="flow-link" aria-hidden="true"><i></i></span>' : ''}`).join('')}</div>
+  </div></section>` : ''}
 
   ${p.scale ? `<section class="on-night sec-s"><div class="wrap">
     <div class="head"><h2 class="t-1" data-reveal>Built for <span class="serif">scale.</span></h2></div>
@@ -572,6 +580,15 @@ if (!reduce) {
     const end = +el.dataset.count, o = { v: 0 };
     gsap.to(o, { v: end, duration: 2, ease: 'expo.out', scrollTrigger: { trigger: el, start: 'top 92%' },
       onUpdate: () => (el.textContent = Math.round(o.v).toLocaleString('en-IN')) });
+  });
+
+  // Block diagram: the thread runs from stage to stage as it scrolls in
+  $$('[data-flow]').forEach((flow) => {
+    const vertical = matchMedia('(max-width: 1000px)').matches;
+    gsap.fromTo($$('.flow-link i', flow), { [vertical ? 'scaleY' : 'scaleX']: 0 }, {
+      [vertical ? 'scaleY' : 'scaleX']: 1, duration: 0.5, ease: 'power2.out', stagger: 0.18,
+      scrollTrigger: { trigger: flow, start: 'top 75%' },
+    });
   });
 
   // Strike the "before" values
