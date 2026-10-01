@@ -210,9 +210,9 @@ export const garments = [
   },
 ];
 
-export const photoCategories = ['Fashion', 'Runway', 'Product', 'Portrait', 'Event', 'Travel', 'Creative'];
+export const photoCategories = ['Fashion', 'Runway', 'Brand', 'Product', 'Portrait', 'Event', 'Travel', 'Creative'];
 
-const p = (cat, n, ratio) => ({ cat, src: `/images/photography/${cat.toLowerCase()}-${String(n).padStart(2, '0')}.jpg`, ratio });
+const p = (cat, n, ratio, cap) => ({ cat, src: `/images/photography/${cat.toLowerCase()}-${String(n).padStart(2, '0')}.jpg`, ratio, cap });
 // Only real photos go here. Add a file to /public/images/photography and a line below.
 export const photos = [
   p('Fashion', 1, '3/2'),
@@ -224,6 +224,10 @@ export const photos = [
   p('Runway', 1, '3/4'),
   p('Runway', 2, '3/4'),
   p('Runway', 3, '3/4'),
+  // Brand shoot for The Artsy Harbour (bag startup)
+  p('Brand', 2, '4/5', 'The Artsy Harbour'),
+  p('Brand', 1, '4/5', 'The Artsy Harbour'),
+  p('Brand', 3, '4/5', 'The Artsy Harbour'),
 ];
 
 export const camera = { body: 'Nikon Z6 II', lens: 'NIKKOR Z 24–70mm f/4 S' };

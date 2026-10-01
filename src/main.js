@@ -302,14 +302,14 @@ function photography() {
   <section class="page-hero"><div class="wrap">
     ${crumbs('Photography')}
     <h1 class="t-hero" data-reveal>Through the <span class="serif">lens.</span></h1>
-    <p class="lede" data-reveal>Fashion, runway and product work — shot and edited by me.</p>
+    <p class="lede" data-reveal>Fashion, runway, brand and product work — shot and edited by me.</p>
   </div></section>
   <section style="padding-bottom:clamp(96px,12vw,160px)"><div class="wrap">
     <div class="photo-bar" data-reveal>
       <div class="seg" role="tablist" aria-label="Filter photos">${cats.map((c, i) => `<button role="tab" aria-selected="${i === 0}" data-cat="${c}">${c}</button>`).join('')}<span class="pill" aria-hidden="true"></span></div>
       <div class="tags"><span class="tag" style="background:var(--surface)">${camera.body}</span><span class="tag" style="background:var(--surface)">${camera.lens}</span></div>
     </div>
-    <div class="masonry" style="columns:${Math.min(3, photos.length)} 300px">${photos.map((ph, i) => `<button class="shot" data-cat="${ph.cat}" data-i="${i}" aria-label="Open ${ph.cat} photo">${media(ph.src, { ratio: ph.ratio, alt: `${ph.cat} photograph` })}<span class="cap">${ph.cat}</span></button>`).join('')}</div>
+    <div class="masonry" style="columns:${Math.min(3, photos.length)} 300px">${photos.map((ph, i) => `<button class="shot" data-cat="${ph.cat}" data-i="${i}" aria-label="Open ${ph.cat} photo">${media(ph.src, { ratio: ph.ratio, alt: `${ph.cat} photograph` })}<span class="cap">${ph.cap ? `${ph.cat} · ${ph.cap}` : ph.cat}</span></button>`).join('')}</div>
   </div></section>
   <div class="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
     <div class="lb-bar"><span class="mono lb-count"></span><button class="lb-btn lb-close" aria-label="Close">${icon.close}</button></div>
@@ -531,7 +531,7 @@ if (page === 'photography') {
     stage.innerHTML = media(ph.src, { ratio: ph.ratio, alt: `${ph.cat} photograph`, eager: true });
     wireMedia(stage);
     $('.lb-count', lb).textContent = `${list.indexOf(i) + 1} / ${list.length}`;
-    $('.lb-cat', lb).textContent = ph.cat;
+    $('.lb-cat', lb).textContent = ph.cap ? `${ph.cat} · ${ph.cap}` : ph.cat;
   };
   const step = (d) => { const list = visible(); show(list[(list.indexOf(idx) + d + list.length) % list.length]); };
   const open = (i) => { last = document.activeElement; show(i); lb.classList.add('is-open'); lenis?.stop(); $('.lb-close', lb).focus(); };

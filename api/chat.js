@@ -60,7 +60,7 @@ ${list(education.map((e) => `${e.place}${e.years ? ` (${e.years})` : ''}: ${e.wh
 GARMENTS HE MADE:
 ${list(garments.map((g) => `${g.title}: ${g.note} — ${g.steps.join(', ')}`))}
 
-PHOTOGRAPHY: ${photoCategories.join(', ')}. Camera ${camera.body} with ${camera.lens}.
+PHOTOGRAPHY: ${photoCategories.join(', ')}. Brand work: product and lookbook photography for The Artsy Harbour, a bag startup. Camera ${camera.body} with ${camera.lens}.
 WHAT HE DOES: ${focusAreas.join(', ')}
 SKILLS:
 ${list(skills.map((s) => `${s.group}: ${s.items.join(', ')}`))}
