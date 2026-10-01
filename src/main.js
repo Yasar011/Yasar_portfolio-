@@ -7,6 +7,7 @@ import {
   education, experience, events, certificates, recommendations, skills,
   focusAreas, tools, languages,
 } from './data.js';
+import { mountAssistant } from './assistant.js';
 
 gsap.registerPlugin(ScrollTrigger);
 const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -449,6 +450,8 @@ $$('a[href^="#"]').forEach((a) => a.addEventListener('click', (e) => {
   if (lenis) lenis.scrollTo(target, { duration: 1.4 });
   else target === 0 ? scrollTo(0, 0) : target.scrollIntoView();
 }));
+
+mountAssistant({ lenis, reduce });
 
 /* ---------- Nav + thread ---------- */
 const navEl = $('.nav'), sewn = $('.thread .sewn'), needle = $('.thread .needle'), threadEl = $('.thread');

@@ -528,3 +528,54 @@ section { position: relative; }
 .dye-fill { fill: url(#dye-grad); }
 .dye .ld-meta { margin-top: 26px; }
 .veil:has(.dye) .veil-in { width: auto; }
+
+/* ============ Ask about Yasar (AI assistant) ============ */
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.ask { position: fixed; right: clamp(14px, 2.4vw, 28px); bottom: clamp(14px, 2.4vw, 28px); z-index: 80; display: flex; flex-direction: column; align-items: flex-end; gap: 14px; }
+.ask-fab { display: inline-flex; align-items: center; gap: 10px; min-height: 50px; padding: 0 20px 0 16px; border-radius: 999px; background: var(--ink); color: #fff; font-weight: 500; font-size: 15px; box-shadow: 0 14px 34px -12px rgba(13, 13, 18, 0.5); transition: background-color 0.3s, transform 0.4s var(--ease); }
+.ask-fab:hover { background: var(--thread); transform: translateY(-2px); }
+.ask-fab-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--thread-2); box-shadow: 0 0 0 0 rgba(125, 115, 255, 0.6); animation: ask-pulse 2.2s ease-out infinite; }
+.ask-fab:hover .ask-fab-dot { background: #fff; }
+@keyframes ask-pulse { 0% { box-shadow: 0 0 0 0 rgba(125, 115, 255, 0.55); } 80%, 100% { box-shadow: 0 0 0 12px rgba(125, 115, 255, 0); } }
+.ask.is-open .ask-fab { display: none; }
+.ask-short { display: none; }
+@media (max-width: 520px) { .ask-short { display: inline; } }
+.ask-panel { width: min(400px, calc(100vw - 28px)); height: min(600px, calc(100svh - 40px)); display: flex; flex-direction: column; background: var(--surface); border-radius: 24px; box-shadow: 0 30px 80px -24px rgba(13, 13, 18, 0.35), 0 0 0 1px var(--line); overflow: hidden; transform-origin: bottom right; }
+.ask-panel[hidden] { display: none; }
+.ask-head { display: flex; align-items: center; gap: 12px; padding: 16px 16px 14px 18px; border-bottom: 1px solid var(--line); }
+.ask-head b { display: block; font-weight: 600; letter-spacing: -0.02em; }
+.ask-head > div span { font-size: 13px; color: var(--ink-3); }
+.ask-head > div { flex: 1; min-width: 0; }
+.ask-avatar { width: 38px; height: 38px; border-radius: 12px; background: var(--ink); color: #fff; display: grid; place-items: center; font-family: var(--f-serif); font-style: italic; font-size: 22px; flex: none; }
+.ask-close { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; color: var(--ink-2); transition: background-color 0.25s; }
+.ask-close:hover { background: var(--surface-2); }
+.ask-close svg { width: 18px; height: 18px; }
+.ask-log { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 10px; overscroll-behavior: contain; }
+.ask-msg { max-width: 86%; padding: 11px 14px; border-radius: 18px; font-size: 15px; line-height: 1.5; letter-spacing: -0.01em; word-wrap: break-word; }
+.ask-msg a { color: var(--thread); text-decoration: underline; text-underline-offset: 2px; }
+.ask-msg--bot { align-self: flex-start; background: var(--surface-2); border-bottom-left-radius: 6px; }
+.ask-msg--user { align-self: flex-end; background: var(--thread); color: #fff; border-bottom-right-radius: 6px; }
+.ask-msg--err { background: #fff1f1; color: #8a1f1f; }
+.ask-typing { display: inline-flex; gap: 5px; padding: 4px 0; }
+.ask-typing i { width: 12px; height: 0; border-top: 2px dashed var(--thread); animation: ask-stitch 1s ease-in-out infinite; }
+.ask-typing i:nth-child(2) { animation-delay: 0.15s; } .ask-typing i:nth-child(3) { animation-delay: 0.3s; }
+@keyframes ask-stitch { 0%, 100% { opacity: 0.25; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }
+.ask-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 18px 12px; }
+.ask-chips[hidden] { display: none; }
+.ask-chips button { font-size: 13.5px; padding: 7px 12px; border-radius: 999px; background: var(--thread-soft); color: var(--thread); font-weight: 500; transition: background-color 0.25s, color 0.25s; text-align: left; }
+.ask-chips button:hover { background: var(--thread); color: #fff; }
+.ask-form { display: flex; gap: 8px; margin: 0 14px; padding: 6px; border-radius: 999px; background: var(--surface-2); }
+.ask-form:focus-within { box-shadow: 0 0 0 2px var(--thread); }
+.ask-form input { flex: 1; min-width: 0; border: 0; background: transparent; font: inherit; font-size: 15px; padding: 0 12px; color: var(--ink); outline: none; }
+.ask-form input::placeholder { color: var(--ink-3); }
+.ask-send { width: 40px; height: 40px; border-radius: 50%; background: var(--ink); color: #fff; display: grid; place-items: center; flex: none; transition: background-color 0.25s; }
+.ask-send:hover { background: var(--thread); }
+.ask-send svg { width: 18px; height: 18px; }
+.ask-note { margin: 0; padding: 10px 18px 14px; font-size: 12px; color: var(--ink-3); text-align: center; }
+.ask-note a { color: inherit; text-decoration: underline; }
+@media (max-width: 520px) {
+  .ask.is-open { inset: 0; right: 0; bottom: 0; }
+  .ask.is-open .ask-panel { width: 100vw; height: 100svh; border-radius: 0; }
+  .ask-long { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .ask-fab-dot, .ask-typing i { animation: none; } }
