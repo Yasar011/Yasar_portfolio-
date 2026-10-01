@@ -1,6 +1,7 @@
 // "Ask about Yasar": a small chat panel backed by /api/chat
 import gsap from 'gsap';
 import { person } from './data.js';
+import { mini } from './mini.js';
 
 const SUGGESTIONS = [
   'What did Yasar build at Brandix?',
@@ -30,11 +31,11 @@ export function mountAssistant({ lenis, reduce }) {
   root.className = 'ask';
   root.innerHTML = `
     <button class="ask-fab" aria-expanded="false" aria-controls="ask-panel" aria-label="Ask about Yasar (AI assistant)">
-      <span class="ask-fab-dot" aria-hidden="true"></span><span class="ask-long" aria-hidden="true">Ask about Yasar</span><span class="ask-short" aria-hidden="true">Ask AI</span>
+      <span class="ask-mini ask-mini--fab">${mini({ wave: true })}</span><span class="ask-long" aria-hidden="true">Ask about Yasar</span><span class="ask-short" aria-hidden="true">Ask AI</span>
     </button>
     <section class="ask-panel" id="ask-panel" role="dialog" aria-label="Ask about Yasar" hidden>
       <header class="ask-head">
-        <span class="ask-avatar" aria-hidden="true">y</span>
+        <span class="ask-mini ask-mini--head">${mini({ wave: true })}</span>
         <div><b>Ask about Yasar</b><span>AI assistant · answers from this portfolio</span></div>
         <button class="ask-close" aria-label="Close assistant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
       </header>
@@ -58,7 +59,14 @@ export function mountAssistant({ lenis, reduce }) {
     const el = document.createElement('div');
     el.className = `ask-msg ask-msg--${role}`;
     el.innerHTML = html;
-    log.append(el);
+    if (role === 'bot') {
+      // Mini-Yasar sits beside each answer
+      const row = document.createElement('div');
+      row.className = 'ask-row';
+      row.innerHTML = `<span class="ask-mini ask-mini--msg">${mini()}</span>`;
+      row.append(el);
+      log.append(row);
+    } else log.append(el);
     log.scrollTop = log.scrollHeight;
     return el;
   };
@@ -73,6 +81,7 @@ export function mountAssistant({ lenis, reduce }) {
     panel.hidden = false;
     fab.setAttribute('aria-expanded', 'true');
     root.classList.add('is-open');
+    root.classList.remove('is-waving'); void root.offsetWidth; root.classList.add('is-waving');
     renderHistory();
     if (!reduce) gsap.fromTo(panel, { y: 24, opacity: 0, scale: 0.96 }, { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: 'expo.out' });
     lenis?.stop();
@@ -92,6 +101,7 @@ export function mountAssistant({ lenis, reduce }) {
   async function ask(q) {
     if (busy || !q.trim()) return;
     busy = true;
+    root.classList.add('is-thinking');
     chips.hidden = true;
     history.push({ role: 'user', content: q.trim() });
     bubble('user', esc(q.trim()));
@@ -122,6 +132,7 @@ export function mountAssistant({ lenis, reduce }) {
       out.innerHTML = format(msg);
     } finally {
       busy = false;
+      root.classList.remove('is-thinking');
     }
   }
 
@@ -133,4 +144,16 @@ export function mountAssistant({ lenis, reduce }) {
   });
   chips.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) ask(b.textContent); });
   if (location.hash === '#ask') open();
+
+  // Mini-Yasar's eyes follow the cursor
+  if (!reduce) {
+    addEventListener('pointermove', (e) => {
+      const target = root.classList.contains('is-open') ? root.querySelector('.ask-mini--head') : root.querySelector('.ask-mini--fab');
+      const r = target.getBoundingClientRect();
+      const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+      const d = Math.hypot(dx, dy) || 1, k = Math.min(1, d / 260);
+      root.style.setProperty('--lx', `${((dx / d) * 1.8 * k).toFixed(2)}px`);
+      root.style.setProperty('--ly', `${((dy / d) * 1.5 * k).toFixed(2)}px`);
+    }, { passive: true });
+  }
 }
