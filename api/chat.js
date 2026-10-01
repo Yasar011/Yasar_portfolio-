@@ -6,9 +6,24 @@ import {
 } from '../src/data.js';
 
 const PROVIDERS = {
-  groq: { url: 'https://api.groq.com/openai/v1/chat/completions', key: 'GROQ_API_KEY', model: 'llama-3.3-70b-versatile' },
-  xai: { url: 'https://api.x.ai/v1/chat/completions', key: 'XAI_API_KEY', model: 'grok-3-mini' },
+  groq: { base: 'https://api.groq.com/openai/v1', key: 'GROQ_API_KEY' },
+  xai: { base: 'https://api.x.ai/v1', key: 'XAI_API_KEY' },
 };
+// Providers retire models often, so pick the best chat model they currently offer (AI_MODEL overrides).
+const PREFER = [/gpt-oss-120b/, /llama-4-maverick/, /llama-3\.3-70b/, /kimi-k2/, /qwen3?-32b/, /llama-4-scout/, /grok-4/, /grok-3/, /70b/, /gpt-oss/, /grok/, /llama/];
+const NOT_CHAT = /whisper|guard|tts|embed|vision-only|image|audio|playai|distil|prompt-guard/i;
+const modelCache = {};
+async function chooseModel(provider) {
+  if (process.env.AI_MODEL) return process.env.AI_MODEL;
+  if (modelCache[provider.id]) return modelCache[provider.id];
+  const r = await fetch(`${provider.base}/models`, { headers: { Authorization: `Bearer ${provider.apiKey}` } });
+  if (!r.ok) throw new Error(`models ${r.status} ${await r.text().catch(() => '')}`);
+  const ids = ((await r.json()).data || []).map((m) => m.id).filter((id) => !NOT_CHAT.test(id));
+  const pick = PREFER.map((re) => ids.find((id) => re.test(id))).find(Boolean) || ids[0];
+  if (!pick) throw new Error('no chat models available');
+  modelCache[provider.id] = pick;
+  return pick;
+}
 
 const MAX_MESSAGES = 12;
 const MAX_CHARS = 800;
@@ -75,7 +90,7 @@ function pickProvider() {
   const order = forced ? [forced] : ['groq', 'xai'];
   for (const id of order) {
     const p = PROVIDERS[id];
-    if (p && process.env[p.key]) return { ...p, apiKey: process.env[p.key], model: process.env.AI_MODEL || p.model };
+    if (p && process.env[p.key]?.trim()) return { ...p, id, apiKey: process.env[p.key].trim() };
   }
   return null;
 }
@@ -122,20 +137,29 @@ export default async function handler(req, res) {
   }
   if (!messages.length || messages[messages.length - 1].role !== 'user') return send(res, 400, 'Ask a question first.');
 
+  const call = (model) => fetch(`${provider.base}/chat/completions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${provider.apiKey}` },
+    body: JSON.stringify({
+      model,
+      messages: [{ role: 'system', content: SYSTEM }, ...messages],
+      temperature: 0.3,
+      max_tokens: 600,
+      stream: true,
+      // Reasoning models spend tokens thinking; keep that short for a snappy chat
+      ...(/gpt-oss/.test(model) ? { reasoning_effort: 'low' } : {}),
+    }),
+  });
   let upstream;
   try {
-    upstream = await fetch(provider.url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${provider.apiKey}` },
-      body: JSON.stringify({
-        model: provider.model,
-        messages: [{ role: 'system', content: SYSTEM }, ...messages],
-        temperature: 0.3,
-        max_tokens: 450,
-        stream: true,
-      }),
-    });
-  } catch {
+    upstream = await call(await chooseModel(provider));
+    if (upstream.status === 404 && !process.env.AI_MODEL) {
+      // The cached model was retired since we chose it: choose again once
+      delete modelCache[provider.id];
+      upstream = await call(await chooseModel(provider));
+    }
+  } catch (err) {
+    console.error('AI provider unreachable', err?.message);
     return send(res, 502, `The assistant couldn't connect. You can reach Yasar at ${person.email}.`);
   }
   if (!upstream.ok || !upstream.body) {
