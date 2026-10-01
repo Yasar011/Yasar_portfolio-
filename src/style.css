@@ -644,3 +644,9 @@ section { position: relative; }
 .g-gallery--duo { margin-top: 0; }
 .together { border-top: 1px solid var(--line); }
 .g-cover .media { max-height: calc(100svh - var(--nav-h) - 56px); margin: 0 auto !important; }
+
+/* Factory floor photos */
+.floor-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px 16px; }
+.floor-item { margin: 0; }
+.floor-item figcaption { margin-top: 10px; font-size: 14px; line-height: 1.45; color: var(--ink-2); }
+@media (max-width: 980px) { .floor-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

@@ -260,6 +260,16 @@ function project() {
       <span class="after"><small>After</small>${m.to}</span></div>`).join('')}</div>
   </div></section>` : ''}
 
+  ${p.floor ? `<section class="sec-s on-white"><div class="wrap">
+    <div class="head"><div><h2 class="t-1" data-reveal>On the factory <span class="serif">floor.</span></h2><p class="lede" data-reveal>QMS in daily use at Brandix Unit 3 — on the line, at the machines and in review.</p></div></div>
+    <div class="floor-grid">${p.floor.map((f) => `<figure class="floor-item" data-reveal><button class="g-shot" data-src="${f.src}" aria-label="Enlarge: ${f.cap}" data-cursor="View">${media(f.src, { ratio: '3/4', alt: f.cap })}</button><figcaption>${f.cap}</figcaption></figure>`).join('')}</div>
+  </div></section>
+  <div class="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
+    <div class="lb-bar"><span class="mono lb-count"></span><button class="lb-btn lb-close" aria-label="Close">${icon.close}</button></div>
+    <div class="lb-stage"></div>
+    <div class="lb-bar"><span class="lb-cat">${p.title}</span><div class="lb-nav"><button class="lb-btn lb-prev" aria-label="Previous photo">${icon.arrowL}</button><button class="lb-btn lb-next" aria-label="Next photo">${icon.arrow}</button></div></div>
+  </div>` : ''}
+
   <section class="sec"><div class="wrap">
     <div class="head"><div><h2 class="t-1" data-reveal>What's <span class="serif">inside.</span></h2><p class="lede" data-reveal>${p.features.length} parts, one system.</p></div></div>
     <div class="feat-grid">${p.features.map(([t, d], k) => `<div class="feat" data-reveal><span class="ico">${pad(k + 1)}</span><h3>${t}</h3><p>${d}</p></div>`).join('')}</div>
@@ -560,12 +570,12 @@ if (page === 'photography') {
 }
 
 /* ---------- Garments: enlarge any photo ---------- */
-if (page === 'garments') {
+if ($('.g-shot') && $('.lightbox')) {
   const shots = $$('.g-shot'), lb = $('.lightbox'), stage = $('.lb-stage', lb);
   let idx = 0, last;
   const show = (i) => {
     idx = (i + shots.length) % shots.length;
-    stage.innerHTML = media(shots[idx].dataset.src, { ratio: '2/3', alt: 'Garment photo', eager: true });
+    stage.innerHTML = media(shots[idx].dataset.src, { ratio: page === 'garments' ? '2/3' : '3/4', alt: shots[idx].getAttribute('aria-label') || 'Photo', eager: true });
     wireMedia(stage);
     $('.lb-count', lb).textContent = `${idx + 1} / ${shots.length}`;
   };
