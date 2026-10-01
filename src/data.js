@@ -50,6 +50,12 @@ export const projects = [
       ['Instant push alerts', 'Firebase Cloud Messaging routes each call straight to the responsible engineering department.'],
       ['Changeover tracking', 'Production style changeovers are logged and timed alongside breakdowns.'],
       ['Works like an app', 'Installable PWA that runs on the phones already on the floor.'],
+      ['Command Center', 'Factory-wide overview: fleet uptime, machines down, open tickets, techs online and workload by department.'],
+      ['Live Monitor', 'Every breakdown with priority and department, assign or re-route in one click, plus a live technician status board.'],
+      ['Preventive maintenance', 'A PM scheduler that tracks when each machine was last serviced and raises service tickets before a failure.'],
+      ['Mechanic skill matrix', 'Machine-wise skill percentage for every mechanic, used to send the right person to the right machine.'],
+      ['Factory Manager', 'Plants, sections, modules and lines with every machine, spares, transfers, bookings and printable QR codes.'],
+      ['QMS link', 'Defects found by quality checks raise maintenance tickets straight into APMS (tagged QCM).'],
     ],
     flow: [
       { label: 'Report', nodes: [{ t: 'Scan machine QR', d: 'Every machine carries a QR code. The operator scans it on the floor, with no login needed.' }] },
@@ -61,7 +67,7 @@ export const projects = [
     ],
     live: 'https://garment-fix.vercel.app/',
     repo: 'https://github.com/Yasar011/GarmentFix',
-    images: ['/images/projects/apms-1.jpg', '/images/projects/apms-2.jpg', '/images/projects/apms-3.jpg'],
+    images: [1, 2, 3, 4, 5].map((n) => `/images/projects/apms-${n}.jpg`),
   },
   {
     id: 'garmentfix-qms',
