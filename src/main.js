@@ -302,7 +302,7 @@ function photography() {
   <section class="page-hero"><div class="wrap">
     ${crumbs('Photography')}
     <h1 class="t-hero" data-reveal>Through the <span class="serif">lens.</span></h1>
-    <p class="lede" data-reveal>Fashion, portrait, event, travel and creative work — shot and edited by me.</p>
+    <p class="lede" data-reveal>Fashion, product, portrait and event work — shot and edited by me.</p>
   </div></section>
   <section style="padding-bottom:clamp(96px,12vw,160px)"><div class="wrap">
     <div class="photo-bar" data-reveal>
