@@ -228,6 +228,15 @@ export const photos = [
   p('Brand', 2, '4/5', 'The Artsy Harbour'),
   p('Brand', 1, '4/5', 'The Artsy Harbour'),
   p('Brand', 3, '4/5', 'The Artsy Harbour'),
+  // Silent Disco event for NEWME Jodhpur
+  p('Event', 1, '4/5', 'NEWME Jodhpur · Silent Disco'),
+  p('Event', 2, '4/5', 'NEWME Jodhpur · Silent Disco'),
+  p('Event', 3, '4/5', 'NEWME Jodhpur · Silent Disco'),
+  p('Event', 4, '4/5', 'NEWME Jodhpur · Silent Disco'),
+  p('Event', 5, '4/5', 'NEWME Jodhpur · Silent Disco'),
+  p('Event', 6, '4/5', 'NEWME Jodhpur · Silent Disco'),
+  p('Event', 7, '4/5', 'NEWME Jodhpur · Silent Disco'),
+  p('Event', 8, '4/5', 'NEWME Jodhpur · Silent Disco'),
 ];
 
 export const camera = { body: 'Nikon Z6 II', lens: 'NIKKOR Z 24–70mm f/4 S' };
