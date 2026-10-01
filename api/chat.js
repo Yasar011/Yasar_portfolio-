@@ -49,7 +49,7 @@ ${projects.map((p) => `* ${p.title} — ${p.full}. Role: ${p.role}. Where: ${p.w
   ${p.scale ? `Scale: ${p.scale.map((s) => `${s.value} ${s.label}`).join('; ')}` : ''}
   ${p.impact ? `Impact: ${p.impact.map((m) => `${m.label}: ${m.from} → ${m.to}`).join('; ')}` : ''}
   Features: ${p.features.map(([t, d]) => `${t} (${d})`).join('; ')}
-  Page: /project?id=${p.id}`).join('\n')}
+  Page: /project?id=${p.id}${p.live ? ` · Live site: ${p.live}` : ''}`).join('\n')}
 
 EXPERIENCE:
 ${list(experience.map((x) => `${x.org} — ${x.role} (${x.when}). ${x.body}`))}

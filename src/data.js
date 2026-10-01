@@ -106,7 +106,8 @@ export const projects = [
       ['Cloud Image Storage', 'Media served through Cloudinary.'],
       ['Responsive UI', 'Built to work on every phone in the audience.'],
     ],
-    images: ['/images/projects/tedx-1.jpg', '/images/projects/tedx-2.jpg', '/images/projects/tedx-3.jpg'],
+    live: 'https://apc-movie.vercel.app/',
+    images: ['/images/projects/tedx-1.jpg', '/images/projects/tedx-2.jpg', '/images/projects/tedx-3.jpg', '/images/projects/tedx-4.jpg'],
   },
   {
     id: 'smart-monitoring',

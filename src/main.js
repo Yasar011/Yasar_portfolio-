@@ -221,6 +221,7 @@ function project() {
     ${crumbs(['Work', '/work'], p.title)}
     <h1 class="t-hero" data-reveal>${p.title}</h1>
     <p class="lede" data-reveal>${p.summary}</p>
+    ${p.live ? `<div class="ctas" style="margin-top:30px" data-reveal><a class="btn" href="${p.live}" target="_blank" rel="noopener">Visit live site ${icon.out}</a></div>` : ''}
   </div>
   <div class="wrap p-stage" data-reveal><div class="grow">${media(p.images[0], { ratio: '16/9', alt: `${p.title} main screen`, eager: true })}</div></div></section>
 

@@ -601,3 +601,6 @@ section { position: relative; }
 @keyframes mini-wave { 0% { opacity: 0; transform: rotate(10deg); } 15% { opacity: 1; } 30% { transform: rotate(-14deg); } 50% { transform: rotate(10deg); } 70% { transform: rotate(-10deg); } 88% { opacity: 1; transform: rotate(0deg); } 100% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .mini-eyes { animation: none; } .ask.is-waving .ask-mini--head .mini-wave, .ask-fab:hover .mini-wave { animation: none; } }
 @media (max-width: 520px) { .ask-fab { padding: 0 16px 0 6px; } }
+.p-hero .ctas { justify-content: center; }
+/* Project screenshots: keep the top of the screen (its menu bar) in frame */
+.p-stage .media img, .w-card .media img, .wr-thumb .media img, .rail .media img, .preview .media img { object-position: 50% 0; }
