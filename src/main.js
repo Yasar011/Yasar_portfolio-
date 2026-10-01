@@ -247,8 +247,8 @@ function project() {
   </div></section>` : ''}
 
   ${p.scale ? `<section class="on-night sec-s"><div class="wrap">
-    <div class="head"><h2 class="t-1" data-reveal>Built for <span class="serif">scale.</span></h2></div>
-    <div class="scale-grid">${p.scale.map((s) => `<div class="metric" data-reveal><div class="num" data-count="${s.value.replace(/,/g, '')}">${s.value}</div><p>${s.label}</p></div>`).join('')}</div>
+    <div class="head"><h2 class="t-1" data-reveal>${p.scaleTitle || 'Built for <span class="serif">scale.</span>'}</h2></div>
+    <div class="scale-grid">${p.scale.map((s) => `<div class="metric" data-reveal><div class="num"${/^[\d,]+$/.test(s.value) ? ` data-count="${s.value.replace(/,/g, '')}"` : ''}>${s.value}</div><p>${s.label}</p></div>`).join('')}</div>
   </div></section>` : ''}
 
   ${p.impact ? `<section class="on-night sec-s"><div class="wrap">
