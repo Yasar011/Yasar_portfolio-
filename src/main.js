@@ -105,88 +105,85 @@ function chrome() {
 /* ---------- Building blocks ---------- */
 const crumbs = (...parts) => `<nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a>${parts.map((p) => `${icon.chev}${Array.isArray(p) ? `<a href="${p[1]}">${p[0]}</a>` : `<span>${p}</span>`}`).join('')}</nav>`;
 const tags = (list) => `<ul class="tags">${list.map((t) => `<li class="tag">${t}</li>`).join('')}</ul>`;
-const words = (html) => html.replace(/(<span class="serif">.*?<\/span>)|([^\s<]+)/g, (m, ser) => (ser ? `<span class="w">${ser}</span>` : `<span class="w">${m}</span>`));
-const qms = projects[1];
 
 /* ---------- Pages ---------- */
+const roles = ['developer', 'photographer', 'garment maker', 'system designer', 'club president'];
+const ticker = ['Web Development', 'Fashion Technology', 'UI/UX Design', 'Photography', 'Garment Development', 'Video Editing', 'Quality Systems', 'Creative Direction'];
+const services = [
+  { t: 'Digital systems', d: 'Web apps and real-time platforms that people on a factory floor or at an event actually use.', items: ['Web Development', 'Firebase', 'PWA', 'UI/UX', 'AI-assisted dev', 'n8n'] },
+  { t: 'Fashion technology', d: 'Quality, maintenance and production systems for apparel manufacturing.', items: ['Quality Systems', 'Process Automation', 'Industrial IoT', 'TukaTech', 'FastReact'] },
+  { t: 'Garment development', d: 'Taking a garment from concept and pattern through cutting, construction and finishing.', items: ['Pattern Making', 'Construction', 'Embellishment', 'Styling'] },
+  { t: 'Photography & visuals', d: 'Fashion, portrait, event and travel photography, edited and graded myself.', items: ['Fashion', 'Portrait', 'Event', 'Lightroom', 'Premiere Pro'] },
+];
+const tickMark = '<svg class="tick-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+
 function home() {
-  const [apms, , tedx, mon] = projects;
+  const madeShot = [
+    { src: garments[0].cover, label: garments[0].title, href: '/garments', cls: 'tall' },
+    { src: photos[0].src, label: 'Fashion photography', href: '/photography' },
+    { src: photos[1].src, label: 'Portrait', href: '/photography' },
+    { src: garments[1].cover, label: garments[1].title, href: '/garments', cls: 'tall' },
+    { src: photos[2].src, label: 'Event', href: '/photography', cls: 'wide' },
+  ];
   return `
-  <section class="hero" id="top">
-    <div class="wrap">
-      <div class="who" data-reveal><span class="avatar">y<img src="${person.portrait}" alt="" onerror="this.remove()"></span><span><b>Yasar C H</b> · BFT, ${person.school}</span></div>
-      <h1 class="t-hero" data-reveal>Fashion, <span class="serif">engineered.</span></h1>
-      <p class="lede" data-reveal>I build real-time systems for apparel factories, make garments by hand, and photograph the people who wear them.</p>
-      <div class="ctas" data-reveal><a class="btn" href="/work">See my work ${icon.arrow}</a><a class="link" href="${person.cv}" download><span>Download CV</span>${icon.download}</a></div>
+  <section class="me" id="top"><div class="wrap me-grid">
+    <div class="me-text">
+      <p class="hello serif" data-reveal>Hi, I'm</p>
+      <h1 class="me-name" aria-label="Yasar C H"><span class="ln"><span>Yasar</span></span><span class="ln"><span>C H<i class="accent">.</i></span></span></h1>
+      <p class="me-role" data-reveal>Fashion Technology student at NIFT Jodhpur, and a <span class="rotator"><span class="rot-track">${[...roles, roles[0]].map((r) => `<span>${r}</span>`).join('')}</span></span></p>
+      <div class="ctas" data-reveal><a class="btn" href="/work" data-cursor="Work">View my work ${icon.arrow}</a><a class="btn btn--line" href="${person.cv}" download>${icon.download} Download CV</a></div>
+      <ul class="me-meta" data-reveal><li><span class="dot"></span>${person.degree} · ${person.semester}</li><li>Perinthalmanna, Kerala → Jodhpur</li></ul>
     </div>
-    <div class="wrap hero-stage">
-      <div class="inner" data-reveal>
-        <div class="grow">${media('/images/hero.jpg', { ratio: '16/9', alt: 'Yasar C H at work', eager: true })}</div>
-        <div class="floating f1"><b data-count="1486">1,486</b><span>machines on APMS</span></div>
-        <div class="floating f2"><b>0</b><span>paper sheets per shift</span></div>
-      </div>
+    <div class="me-photo" data-reveal>
+      <div class="me-frame">${media(person.portrait, { ratio: '4/5', alt: 'Portrait of Yasar C H', eager: true })}</div>
+      <svg class="badge" viewBox="0 0 200 200" aria-hidden="true"><defs><path id="circ" d="M100,100 m-72,0 a72,72 0 1,1 144,0 a72,72 0 1,1 -144,0"/></defs>
+        <circle cx="100" cy="100" r="98"/><text class="badge-ring"><textPath href="#circ">FASHION · TECHNOLOGY · PHOTOGRAPHY · </textPath></text>
+        <text x="100" y="122" text-anchor="middle" class="badge-y">y</text></svg>
     </div>
-  </section>
+  </div></section>
 
-  <section class="on-night sec" style="margin-top:clamp(96px,12vw,160px)">
-    <div class="wrap narrow">
-      <p class="statement" data-scrub>${words('Every shift, 70–80 sheets of paper. Hours of re-typing. Reports six hours late. So I built a system that made it all <span class="serif">disappear.</span>')}</p>
-    </div>
-    <div class="wrap">
-      <div class="metrics">
-        <div class="metric" data-reveal><div class="num" data-count="1486">1,486</div><p>machines tracked by APMS across 32 production modules.</p></div>
-        <div class="metric" data-reveal><div class="num">70–80<small>→</small><span class="to">0</span></div><p>paper inspection sheets per shift with GarmentFix QMS.</p></div>
-        <div class="metric" data-reveal><div class="num">3–4h<small>→</small><span class="to">0</span></div><p>of manual data re-entry removed every day.</p></div>
-        <div class="metric" data-reveal><div class="num">6h<small>→</small><span class="to">Live</span></div><p>quality reporting delay, now real-time.</p></div>
-      </div>
-      <div class="ctas" style="margin-top:44px" data-reveal><a class="link" href="/project?id=${qms.id}"><span>How GarmentFix QMS works</span>${icon.arrow}</a></div>
-    </div>
-  </section>
+  <div class="ticker" aria-hidden="true"><div class="ticker-track">${[0, 1].map(() => ticker.map((t) => `<span>${t}</span>${tickMark}`).join('')).join('')}</div></div>
 
-  <section class="sec">
-    <div class="wrap">
-      <div class="head"><div><h2 class="t-1" data-reveal>Selected <span class="serif">work.</span></h2><p class="lede" data-reveal>Software that runs on a real factory floor, and a platform that ran a TEDx event.</p></div>
-        <a class="link" href="/work" data-reveal><span>All projects</span>${icon.arrow}</a></div>
-      <div class="bento">
-        ${tile(apms, 'tile--wide')}
-        <a class="tile tile--thread tile--narrow" href="/project?id=${qms.id}" data-reveal>
-          <div class="txt"><span class="kicker-num">02 · Impact</span><h3 class="t-2">${qms.title}</h3><p class="dim">Paper sheets per shift, before and after.</p></div>
-          <div class="big-num">70–80 → 0</div><span class="go">${icon.arrow}</span></a>
-        ${tile(qms, '', 'Real-time quality, zero paper.')}
-        ${tile(tedx, '')}
-        ${tile(mon, 'tile--wide tile--night')}
-        <a class="tile tile--narrow" href="/work" data-reveal><div class="txt"><span class="kicker-num">All work</span><h3 class="t-2">Every project, in detail.</h3><p class="dim">Problem, build, features and results for each.</p></div><div class="big-num">${pad(projects.length)}</div><span class="go">${icon.arrow}</span></a>
-      </div>
+  <section class="sec about-snip"><div class="wrap snip-grid">
+    <h2 class="snip-label" data-reveal>About me</h2>
+    <div>
+      <p class="snip-big" data-reveal>I work where <span class="serif accent">fabric</span> meets <span class="serif accent">code</span> — building the systems a factory runs on, sewing garments by hand, and telling stories through a camera.</p>
+      <p class="lede" data-reveal style="max-width:58ch">${person.about}</p>
+      <div class="ctas" style="margin-top:32px" data-reveal><a class="link" href="/about"><span>More about me</span>${icon.arrow}</a><a class="link" href="/cv"><span>Read my CV</span>${icon.arrow}</a></div>
     </div>
-  </section>
+  </div></section>
 
-  <section class="sec on-white">
-    <div class="wrap">
-      <div class="head"><div><h2 class="t-1" data-reveal>Beyond the <span class="serif">screen.</span></h2><p class="lede" data-reveal>Garments I made from sketch to stitch, photography, and the people I lead.</p></div></div>
-      <div class="bento">
-        <a class="tile" href="/garments" data-reveal style="background:var(--bg)"><div class="txt"><span class="kicker-num">Garments</span><h3 class="t-2">Cut, sewn, styled.</h3><p class="dim">${garments.length} garments developed completely, pattern to presentation.</p></div><div class="tile-media">${media(garments[0].cover, { ratio: '4/3', alt: garments[0].title })}</div><span class="go">${icon.arrow}</span></a>
-        <a class="tile" href="/photography" data-reveal style="background:var(--bg)"><div class="txt"><span class="kicker-num">Photography</span><h3 class="t-2">Fashion, portrait, event, travel.</h3><p class="dim">Shot on ${camera.body}.</p></div><div class="tile-media">${media(photos[0].src, { ratio: '4/3', alt: 'Fashion photograph' })}</div><span class="go">${icon.arrow}</span></a>
-        <a class="tile tile--narrow tile--night" href="/about" data-reveal><div class="txt"><span class="kicker-num">Internship</span><h3 class="t-2">Brandix Apparel India</h3><p class="dim">8 weeks at Unit-III, Visakhapatnam. Built QMS, APMS and HRMMS.</p></div><div class="big-num">8 wks</div><span class="go">${icon.arrow}</span></a>
-        <a class="tile tile--narrow" href="/about" data-reveal style="background:var(--bg)"><div class="txt"><span class="kicker-num">Leadership</span><h3 class="t-2">President, Adventure & Photography Club</h3><p class="dim">NIFT Jodhpur, 2026–27.</p></div><div class="big-num">26–27</div><span class="go">${icon.arrow}</span></a>
-        <a class="tile tile--narrow" href="/about" data-reveal style="background:var(--bg)"><div class="txt"><span class="kicker-num">Service</span><h3 class="t-2">National Service Scheme</h3><p class="dim">Two years of service.</p></div><div class="big-num"><span data-count="240">240</span> h</div><span class="go">${icon.arrow}</span></a>
-      </div>
-    </div>
-  </section>
+  <section class="sec on-white" style="padding-bottom:clamp(64px,8vw,110px)"><div class="wrap">
+    <div class="head"><h2 class="t-1" data-reveal>Selected <span class="serif">work.</span></h2><a class="link" href="/work" data-reveal><span>All projects</span>${icon.arrow}</a></div>
+    <ol class="work-index">${projects.map((p, i) => `<li data-reveal><a class="work-row" href="/project?id=${p.id}" data-preview="${p.images[0]}" data-cursor="View">
+      <span class="wr-num mono">${pad(i + 1)}</span>
+      <span class="wr-thumb">${media(p.images[0], { ratio: '16/10', alt: '' })}</span>
+      <span class="wr-title">${p.title}</span>
+      <span class="wr-meta"><span>${p.role}</span><span class="dim">${p.where}</span></span>
+      <span class="wr-go">${icon.arrow}</span></a></li>`).join('')}</ol>
+  </div></section>
 
-  <section class="sec">
-    <div class="wrap"><div class="head"><div><h2 class="t-1" data-reveal>Through the <span class="serif">lens.</span></h2><p class="lede" data-reveal>A few frames. Drag, or use the arrows.</p></div>
-      <div class="rail-ctrl" data-reveal><button class="rail-prev" aria-label="Previous photos">${icon.arrowL}</button><button class="rail-next" aria-label="Next photos">${icon.arrow}</button></div></div></div>
-    <div class="rail" data-reveal>${photos.slice(0, 10).map((p) => `<a href="/photography" aria-label="${p.cat} photograph">${media(p.src, { ratio: p.ratio === '3/2' ? '3/2' : '4/5', cls: p.ratio === '3/2' ? 'wide' : '', alt: `${p.cat} photograph` })}</a>`).join('')}</div>
-    <div class="wrap center" style="margin-top:28px"><a class="link" href="/photography" data-reveal><span>Open the full gallery</span>${icon.arrow}</a></div>
-  </section>`;
-}
+  <section class="sec"><div class="wrap">
+    <div class="head"><div><h2 class="t-1" data-reveal>Made <span class="serif">&amp;</span> shot.</h2><p class="lede" data-reveal>Garments I designed and sewed, and frames from behind my ${camera.body}.</p></div>
+      <div class="ctas" data-reveal><a class="link" href="/garments"><span>Garments</span>${icon.arrow}</a><a class="link" href="/photography"><span>Photography</span>${icon.arrow}</a></div></div>
+    <div class="mosaic">${madeShot.map((m) => `<a class="mo ${m.cls || ''}" href="${m.href}" data-reveal data-cursor="Open">${media(m.src, { alt: m.label })}<span class="mo-cap">${m.label}</span></a>`).join('')}</div>
+  </div></section>
 
-function tile(p, cls, sub) {
-  const i = projects.indexOf(p);
-  return `<a class="tile ${cls}" href="/project?id=${p.id}" data-reveal>
-    <div class="txt"><span class="kicker-num">${pad(i + 1)} · ${p.where}</span><h3 class="t-2">${p.title}</h3><p class="dim">${sub || p.full}</p></div>
-    <div class="tile-media">${media(p.images[0], { ratio: '16/10', alt: `${p.title} screen` })}</div>
-    <span class="go">${icon.arrow}</span></a>`;
+  <section class="sec on-white"><div class="wrap">
+    <div class="head"><h2 class="t-1" data-reveal>What I <span class="serif">do.</span></h2></div>
+    <ol class="services">${services.map((x, i) => `<li data-reveal><span class="mono accent">${pad(i + 1)}</span><div><h3>${x.t}</h3><p>${x.d}</p></div>${tags(x.items)}</li>`).join('')}</ol>
+  </div></section>
+
+  <section class="sec"><div class="wrap">
+    <div class="head"><h2 class="t-1" data-reveal>Experience.</h2><a class="link" href="/cv" data-reveal><span>Full CV</span>${icon.arrow}</a></div>
+    <ol class="exp-list">${experience.map((x) => `<li data-reveal><span class="mono dim">${x.when.split(' · ')[0]}</span><b>${x.org}</b><span class="dim">${x.role.split(' · ')[0]}</span></li>`).join('')}</ol>
+  </div></section>
+
+  <section class="sec" style="padding-top:0"><div class="wrap">
+    <div class="head"><h2 class="t-1" data-reveal>Kind <span class="serif">words.</span></h2></div>
+    <div class="lor-grid">${recommendations.map((r) => `<article class="lor" data-reveal><span class="label">Letter of recommendation</span><p>${r.about}</p>
+      <div class="by"><i>${r.name.replace('Mr. ', '')[0]}</i><span><b>${r.name}</b><span>${r.title}</span></span></div></article>`).join('')}</div>
+  </div></section>`;
 }
 
 function work() {
@@ -196,14 +193,13 @@ function work() {
     <h1 class="t-hero" data-reveal>The <span class="serif">work.</span></h1>
     <p class="lede" data-reveal>Systems built for a working apparel factory, a full event platform for TEDx, and machines that report on themselves.</p>
   </div></section>
-  <section style="padding-bottom:clamp(96px,12vw,160px)"><div class="wrap"><div class="work-stack">
-    ${projects.map((p, i) => `<a class="work-card" href="/project?id=${p.id}" data-reveal>
+  <section style="padding-bottom:clamp(96px,12vw,160px)"><div class="wrap"><div class="w-grid">
+    ${projects.map((p, i) => `<a class="w-card" href="/project?id=${p.id}" data-reveal data-cursor="View">
       ${media(p.images[0], { ratio: '4/3', alt: `${p.title} screen` })}
-      <div class="info"><span class="mono accent">${pad(i + 1)} / ${pad(projects.length)} · ${p.where}</span>
-        <h2 class="t-1">${p.title}</h2><p class="role">${p.role}</p><p>${p.summary}</p>
-        ${tags(p.stack.slice(0, 5))}
-        <span class="link" style="margin-top:26px"><span>Read the case study</span>${icon.arrow}</span></div>
+      <div class="w-info"><div><h2 class="t-2">${p.title}</h2><p class="dim">${p.role} · ${p.where}</p></div><span class="mono accent">${pad(i + 1)}</span></div>
+      ${tags(p.stack.slice(0, 4))}
     </a>`).join('')}
+    <a class="w-card w-more" href="/garments" data-reveal data-cursor="Open"><span class="t-2">Looking for garments<br>or photography?</span><span class="link"><span>See what I've made</span>${icon.arrow}</span></a>
   </div></div></section>`;
 }
 
@@ -536,7 +532,7 @@ if (page === 'photography') {
 /* ---------- Motion ---------- */
 if (!reduce) {
   // Hero entrance, staggered
-  const heroBits = $$('.hero [data-reveal], .page-hero [data-reveal], .p-hero [data-reveal]');
+  const heroBits = $$('.me [data-reveal], .page-hero [data-reveal], .p-hero [data-reveal]');
   gsap.to(heroBits, { opacity: 1, y: 0, duration: 1.2, ease: 'expo.out', stagger: 0.09, delay: 0.1 });
 
   ScrollTrigger.batch($$('[data-reveal]').filter((el) => !heroBits.includes(el)), {
@@ -584,6 +580,70 @@ if (!reduce) {
 } else {
   $$('.process li').forEach((li) => li.classList.add('is-on'));
   $$('.process .fill').forEach((f) => f.style.setProperty('--p', 1));
+}
+
+/* ---------- Personality: name, roles, cursor, previews ---------- */
+if (!reduce) {
+  const nameLines = $$('.me-name .ln > span');
+  if (nameLines.length) gsap.from(nameLines, { yPercent: 110, duration: 1.4, ease: 'expo.out', stagger: 0.1, delay: 0.15 });
+  const portrait = $('.me-frame');
+  if (portrait) gsap.from(portrait, { y: 60, rotate: 8, opacity: 0, duration: 1.6, ease: 'expo.out', delay: 0.3 });
+
+  // Rotating role word
+  const track = $('.rot-track');
+  if (track) {
+    const n = track.children.length - 1;
+    const tl = gsap.timeline({ repeat: -1, delay: 1.6 });
+    for (let i = 1; i <= n; i++) tl.to(track, { yPercent: (-100 / (n + 1)) * i, duration: 0.7, ease: 'expo.inOut' }, '+=1.6');
+    tl.set(track, { yPercent: 0 });
+  }
+
+  // Ticker and photo drift a little with scroll
+  if (portrait) gsap.to('.me-photo', { yPercent: -8, ease: 'none', scrollTrigger: { trigger: '.me', start: 'top top', end: 'bottom top', scrub: true } });
+}
+
+const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+if (finePointer && !reduce) {
+  // Custom cursor
+  const cur = document.createElement('div');
+  cur.className = 'cursor is-hidden';
+  cur.innerHTML = '<span class="c-ring"><span></span></span><span class="c-dot"></span>';
+  document.body.append(cur);
+  const ring = $('.c-ring', cur), dot = $('.c-dot', cur), label = $('.c-ring span', cur);
+  const rx = gsap.quickTo(ring, 'x', { duration: 0.45, ease: 'power3' }), ry = gsap.quickTo(ring, 'y', { duration: 0.45, ease: 'power3' });
+  const dx = gsap.quickTo(dot, 'x', { duration: 0.08 }), dy = gsap.quickTo(dot, 'y', { duration: 0.08 });
+
+  // Floating project preview
+  const pv = document.createElement('div');
+  pv.className = 'preview';
+  pv.innerHTML = '<div class="pv-in"></div>';
+  document.body.append(pv);
+  const pvIn = $('.pv-in', pv);
+  const px = gsap.quickTo(pv, 'x', { duration: 0.6, ease: 'power3' }), py = gsap.quickTo(pv, 'y', { duration: 0.6, ease: 'power3' });
+
+  addEventListener('pointermove', (e) => {
+    cur.classList.remove('is-hidden');
+    rx(e.clientX); ry(e.clientY); dx(e.clientX); dy(e.clientY);
+    px(e.clientX + 28); py(e.clientY - 110);
+  });
+  document.addEventListener('pointerleave', () => cur.classList.add('is-hidden'));
+
+  document.addEventListener('pointerover', (e) => {
+    const lab = e.target.closest('[data-cursor]');
+    const link = e.target.closest('a, button');
+    cur.classList.toggle('is-label', !!lab);
+    cur.classList.toggle('is-link', !lab && !!link);
+    if (lab) label.textContent = lab.dataset.cursor;
+    const row = e.target.closest('[data-preview]');
+    if (row) {
+      if (pv.dataset.src !== row.dataset.preview) {
+        pv.dataset.src = row.dataset.preview;
+        pvIn.innerHTML = media(row.dataset.preview, { ratio: '16/10', alt: '' });
+        wireMedia(pvIn);
+      }
+      pv.classList.add('is-on');
+    } else pv.classList.remove('is-on');
+  });
 }
 
 addEventListener('load', () => ScrollTrigger.refresh());
