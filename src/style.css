@@ -496,9 +496,7 @@ section { position: relative; }
 .btn, .wr-go, .next .go, .social, .rail-ctrl button { will-change: transform; }
 
 /* ============ Loader: stitch + pinking-shear cut ============ */
-.loader { position: fixed; inset: 0; z-index: 150; pointer-events: none; }
-.loader .half { position: absolute; inset: 0; background: var(--night); color: var(--on-night); display: grid; place-items: center; transform-origin: 50% 50%; will-change: transform; }
-.ld-in { width: min(86vw, 560px); text-align: left; }
+.ld-in { text-align: left; }
 .mono { width: 100%; height: auto; overflow: visible; }
 .mono path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
 .mono-guide { stroke: rgba(241, 241, 244, 0.07); stroke-width: 9; }
@@ -510,14 +508,14 @@ section { position: relative; }
 .ld-count { font-family: var(--f-mono); color: #fff; font-variant-numeric: tabular-nums; }
 .ld-name { margin: 10px 0 0; font-weight: 600; letter-spacing: -0.02em; color: var(--on-night); }
 .ld-name span { font-weight: 400; color: var(--on-night-2); }
-.loader .cut { position: absolute; left: 0; right: 0; top: 50%; height: 0; z-index: 2; }
-.loader .cut i { position: absolute; left: 0; right: 0; top: -1px; border-top: 2px dashed rgba(241, 241, 244, 0.55); transform-origin: left; transform: scaleX(0); }
-.loader .snip { position: absolute; top: -22px; width: 44px; height: 44px; margin-left: -22px; color: #fff; filter: drop-shadow(0 0 10px rgba(125, 115, 255, 0.8)); }
-.loader .ld-base { position: absolute; inset: 0; background: var(--night); }
 
-/* Page transition */
-.pt-cover { position: fixed; inset: 0; z-index: 150; background: var(--night); color: var(--on-night); display: grid; place-items: center; }
-.pt-in { text-align: center; padding: 0 var(--gutter); overflow: hidden; }
-.pt-label { display: block; font-size: clamp(2.8rem, 9vw, 8rem); font-weight: 600; letter-spacing: -0.05em; line-height: 1.05; color: var(--on-night); }
-.pt-stitch { display: block; height: 0; margin: 22px auto 0; width: min(60vw, 520px); border-top: 2px dashed var(--thread-2); transform-origin: left; }
-.loader .pt-in .pt-label { color: var(--on-night); }
+
+/* ============ Silk veil: loader + page transitions ============ */
+.veil { position: fixed; inset: 0; z-index: 150; display: grid; place-items: center; pointer-events: none; color: var(--on-night); }
+.veil .silk { position: absolute; inset: 0; width: 100%; height: 100%; }
+.silk-a { fill: var(--thread); }
+.silk-b { fill: var(--night); }
+.veil-in { position: relative; z-index: 1; width: min(86vw, 560px); }
+.veil .pt-label { display: block; text-align: center; font-size: clamp(2.8rem, 9vw, 8rem); font-weight: 600; letter-spacing: -0.05em; line-height: 1.05; white-space: nowrap; }
+.veil:has(.pt-label) .veil-in { width: auto; max-width: 92vw; }
+.fl { display: inline-block; will-change: transform, filter; }
