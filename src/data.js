@@ -100,7 +100,7 @@ export const projects = [
       { label: 'Insight', nodes: [{ t: 'QMS Bot (AI)', d: 'Groq-powered analysis that explains trends and answers questions about quality.' }] },
     ],
     repo: 'https://github.com/Yasar011/GarmentFix',
-    images: ['/images/projects/qms-1.jpg', '/images/projects/qms-2.jpg', '/images/projects/qms-3.jpg'],
+    images: ['/images/projects/qms-1.jpg', '/images/projects/qms-2.jpg', '/images/projects/qms-3.jpg', '/images/projects/qms-4.jpg'],
   },
   {
     id: 'tedx-nift-jodhpur',

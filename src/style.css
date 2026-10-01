@@ -603,7 +603,7 @@ section { position: relative; }
 @media (max-width: 520px) { .ask-fab { padding: 0 16px 0 6px; } }
 .p-hero .ctas { justify-content: center; }
 /* Project screenshots: keep the top of the screen (its menu bar) in frame */
-.p-stage .media img, .w-card .media img, .wr-thumb .media img, .rail .media img, .preview .media img { object-position: 50% 0; }
+.p-stage .media img, .w-card .media img, .wr-thumb .media img, .rail .media img, .preview .media img { object-position: 0 0; }
 
 /* ============ Block diagram: how the system works ============ */
 .flow { display: flex; align-items: stretch; gap: 0; }
