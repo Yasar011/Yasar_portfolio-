@@ -58,7 +58,7 @@ EDUCATION:
 ${list(education.map((e) => `${e.place}${e.years ? ` (${e.years})` : ''}: ${e.what}${e.now ? `. ${e.now}` : ''}`))}
 
 GARMENTS HE MADE:
-${list(garments.map((g) => `${g.title}: ${g.note} — ${g.steps.join(', ')}`))}
+${list(garments.map((g) => `${g.title}: ${g.note} — ${g.steps.join(', ')}${g.details ? `. Design details: ${g.details.join(', ')}` : ''}`))}
 
 PHOTOGRAPHY: ${photoCategories.join(', ')}. Brand work: product and lookbook photography for The Artsy Harbour, a bag startup. Event work: photographed the Silent Disco event for NEWME Jodhpur (fashion brand store). Camera ${camera.body} with ${camera.lens}.
 WHAT HE DOES: ${focusAreas.join(', ')}

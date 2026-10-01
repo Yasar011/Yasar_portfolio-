@@ -187,8 +187,9 @@ export const garments = [
       'Stitching & finishing',
       'Styling & presentation',
     ],
+    details: ['Two-tone lilac & plum panels', 'Stand collar with V-notch', 'Flared bell sleeves', 'Hand-applied flower cluster', 'Laced back detail', 'Floor-length flare'],
     cover: '/images/garments/dress-1.jpg',
-    images: ['/images/garments/dress-2.jpg', '/images/garments/dress-3.jpg', '/images/garments/dress-4.jpg'],
+    images: [2, 3, 4, 5, 6, 7].map((n) => `/images/garments/dress-${n}.jpg`),
   },
   {
     id: 'crop-top-skirt',
@@ -205,10 +206,14 @@ export const garments = [
       'Stitching & finishing',
       'Styling & presentation',
     ],
+    details: ['Smocked bodice', 'Sheer dotted puff sleeves', 'Ruffled cuffs & tie neckline', 'Lace-up eyelet panels', 'Contrast beige godets', 'Ribbon-tie trims'],
     cover: '/images/garments/croptop-1.jpg',
-    images: ['/images/garments/croptop-2.jpg', '/images/garments/croptop-3.jpg', '/images/garments/croptop-4.jpg'],
+    images: [2, 3, 4].map((n) => `/images/garments/croptop-${n}.jpg`),
   },
 ];
+
+// Both garments styled together
+export const garmentsTogether = [1, 2, 3, 4, 5, 6].map((n) => `/images/garments/duo-${n}.jpg`);
 
 export const photoCategories = ['Fashion', 'Runway', 'Brand', 'Product', 'Portrait', 'Event', 'Travel', 'Creative'];
 

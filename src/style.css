@@ -636,3 +636,11 @@ section { position: relative; }
 }
 
 .mo.big { grid-column: span 2; grid-row: span 2; }
+
+/* Garments: clickable gallery + worn together */
+.g-shot { display: block; width: 100%; text-align: left; border-radius: var(--r-lg); }
+.g-shot:hover .media img { transform: scale(1.04); }
+.g-gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.g-gallery--duo { margin-top: 0; }
+.together { border-top: 1px solid var(--line); }
+.g-cover .media { max-height: calc(100svh - var(--nav-h) - 56px); margin: 0 auto !important; }

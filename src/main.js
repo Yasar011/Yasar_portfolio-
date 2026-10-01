@@ -5,7 +5,7 @@ import Lenis from 'lenis';
 import {
   person, projects, garments, photos, photoCategories, camera,
   education, experience, events, certificates, recommendations, skills,
-  focusAreas, tools, languages,
+  focusAreas, tools, languages, garmentsTogether,
 } from './data.js';
 import { mountAssistant } from './assistant.js';
 
@@ -285,15 +285,25 @@ function garmentsPage() {
   </div></section>
   ${garments.map((g, i) => `<section class="garment${i % 2 ? ' on-white' : ''}"><div class="wrap">
     <div class="g-top">
-      <div class="g-cover" data-reveal>${media(g.cover, { ratio: '4/5', alt: g.title })}</div>
+      <div class="g-cover" data-reveal>${media(g.cover, { ratio: '2/3', alt: g.title })}</div>
       <div>
         <span class="mono accent" data-reveal>Garment ${pad(i + 1)} · ${g.note}</span>
         <h2 class="t-1" data-reveal style="margin-top:14px">${g.title}</h2>
+        ${g.details ? `<div data-reveal style="margin-top:22px">${tags(g.details)}</div>` : ''}
         <ol class="process"><span class="fill" aria-hidden="true"></span>${g.steps.map((s) => `<li><b>${s}</b></li>`).join('')}</ol>
       </div>
     </div>
-    <div class="g-gallery">${g.images.map((s) => `<div data-reveal>${media(s, { ratio: '3/4', alt: `${g.title} detail` })}</div>`).join('')}</div>
-  </div></section>`).join('')}`;
+    <div class="g-gallery">${g.images.map((s) => `<button class="g-shot" data-src="${s}" aria-label="Enlarge ${g.title} photo" data-reveal data-cursor="View">${media(s, { ratio: '2/3', alt: `${g.title} detail` })}</button>`).join('')}</div>
+  </div></section>`).join('')}
+  <section class="garment together"><div class="wrap">
+    <div class="head"><div><h2 class="t-1" data-reveal>Worn <span class="serif">together.</span></h2><p class="lede" data-reveal>Both garments styled side by side for the final shoot.</p></div></div>
+    <div class="g-gallery g-gallery--duo">${garmentsTogether.map((s) => `<button class="g-shot" data-src="${s}" aria-label="Enlarge photo of both garments" data-reveal data-cursor="View">${media(s, { ratio: '2/3', alt: 'Both garments styled together' })}</button>`).join('')}</div>
+  </div></section>
+  <div class="lightbox" role="dialog" aria-modal="true" aria-label="Garment photo viewer">
+    <div class="lb-bar"><span class="mono lb-count"></span><button class="lb-btn lb-close" aria-label="Close">${icon.close}</button></div>
+    <div class="lb-stage"></div>
+    <div class="lb-bar"><span class="lb-cat">Garments</span><div class="lb-nav"><button class="lb-btn lb-prev" aria-label="Previous photo">${icon.arrowL}</button><button class="lb-btn lb-next" aria-label="Next photo">${icon.arrow}</button></div></div>
+  </div>`;
 }
 
 function photography() {
@@ -546,6 +556,31 @@ if (page === 'photography') {
     if (e.key === 'Escape') close();
     if (e.key === 'ArrowRight') step(1);
     if (e.key === 'ArrowLeft') step(-1);
+  });
+}
+
+/* ---------- Garments: enlarge any photo ---------- */
+if (page === 'garments') {
+  const shots = $$('.g-shot'), lb = $('.lightbox'), stage = $('.lb-stage', lb);
+  let idx = 0, last;
+  const show = (i) => {
+    idx = (i + shots.length) % shots.length;
+    stage.innerHTML = media(shots[idx].dataset.src, { ratio: '2/3', alt: 'Garment photo', eager: true });
+    wireMedia(stage);
+    $('.lb-count', lb).textContent = `${idx + 1} / ${shots.length}`;
+  };
+  const open = (i) => { last = document.activeElement; show(i); lb.classList.add('is-open'); lenis?.stop(); $('.lb-close', lb).focus(); };
+  const close = () => { lb.classList.remove('is-open'); lenis?.start(); last?.focus(); };
+  shots.forEach((s, i) => s.addEventListener('click', () => open(i)));
+  $('.lb-close', lb).addEventListener('click', close);
+  $('.lb-prev', lb).addEventListener('click', () => show(idx - 1));
+  $('.lb-next', lb).addEventListener('click', () => show(idx + 1));
+  lb.addEventListener('click', (e) => { if (e.target === lb || e.target === stage) close(); });
+  document.addEventListener('keydown', (e) => {
+    if (!lb.classList.contains('is-open')) return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'ArrowRight') show(idx + 1);
+    if (e.key === 'ArrowLeft') show(idx - 1);
   });
 }
 
