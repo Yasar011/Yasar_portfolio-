@@ -18,7 +18,7 @@ const page = document.body.dataset.page;
 let seenIntro = false;
 try { seenIntro = sessionStorage.getItem('intro') === '1'; sessionStorage.setItem('intro', '1'); } catch (e) { /* storage blocked */ }
 const showIntro = page === 'home' && !reduce && !seenIntro;
-const D = showIntro ? 3.4 : 0; // delay hero entrance until the curtain lifts
+const D = showIntro ? 3.3 : 0; // delay hero entrance until the curtain lifts
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const pad = (n) => String(n).padStart(2, '0');
@@ -652,59 +652,75 @@ if (finePointer && !reduce) {
   });
 }
 
-/* ---------- Wow: intro ---------- */
+/* ---------- Loader: a monogram is stitched, then the cloth is cut open ---------- */
 if (showIntro) {
-  const words = ['Fashion', 'Technology', 'Photography'];
-  const intro = document.createElement('div');
-  intro.className = 'intro';
-  intro.setAttribute('aria-hidden', 'true');
-  intro.innerHTML = `${'<span class="strip"></span>'.repeat(5)}
-    <div class="intro-cards"></div>
-    <div class="intro-words">${words.map((w) => `<div class="iw"><span>${w}<i>.</i></span></div>`).join('')}</div>
-    <div class="intro-in">
-      <span class="intro-hi serif">Hi, I'm</span>
-      <div class="intro-name"><span>Yasar C H</span></div>
-    </div>
-    <div class="intro-bar"><div class="intro-stitch"><i></i><b></b></div><div class="intro-foot"><span>Portfolio · ${new Date().getFullYear()}</span><span class="intro-count">000</span></div></div>`;
-  document.body.append(intro);
+  // Monoline "Y C H", drawn as one stitch path (each M starts a new letter stroke)
+  // (Chrome restarts dashes at every subpath, so each stroke is its own path, sewn in order)
+  const STROKES = ['M24 18 L56 56 L88 18', 'M56 56 L56 94', 'M178 30 C160 12 122 16 120 56 C118 94 160 100 178 82', 'M212 18 L212 94', 'M212 56 L272 56', 'M272 18 L272 94'];
+  const MONO = STROKES.join(' ');
+  const scissors = '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="13" r="6"/><circle cx="9" cy="35" r="6"/><path d="M14 16 44 30M14 32 44 18"/></svg>';
+  const copy = (k) => `<div class="ld-in">
+      <svg class="mono" viewBox="0 0 296 112" aria-hidden="true">
+        <path class="mono-guide" d="${MONO}"/>
+        ${STROKES.map((d) => `<path class="mono-stitch" d="${d}"/>`).join('')}
+        <g class="needle"><line x1="0" y1="-26" x2="0" y2="0"/><circle r="3.4"/></g>
+      </svg>
+      <div class="ld-meta"><span class="ld-status">Threading the needle</span><span class="ld-count">000</span></div>
+      <p class="ld-name">Yasar C H <span>· Fashion · Technology · Photography</span></p>
+    </div>`;
+
+  // Pinking-shear zigzag shared by both halves so they interlock exactly
+  const teeth = 56, amp = 9, zig = [];
+  for (let i = 0; i <= teeth; i++) zig.push(`${((i / teeth) * 100).toFixed(3)}% calc(50% ${i % 2 ? '+' : '-'} ${amp}px)`);
+  const topClip = `polygon(0 0, 100% 0, ${[...zig].reverse().join(', ')})`;
+  const botClip = `polygon(${zig.join(', ')}, 100% 100%, 0 100%)`;
+
+  const ld = document.createElement('div');
+  ld.className = 'loader';
+  ld.setAttribute('aria-hidden', 'true');
+  ld.innerHTML = `<div class="ld-base"></div><div class="half" style="clip-path:${topClip}">${copy(0)}</div>
+    <div class="half" style="clip-path:${botClip}">${copy(1)}</div>
+    <div class="cut"><i></i><span class="snip">${scissors}</span></div>`;
+  document.body.append(ld);
   lenis?.stop();
 
-  // Real work images shuffle behind the words, but only ones that have actually loaded
-  const pool = [person.portrait, ...projects.map((p) => p.images[0]), ...garments.map((g) => g.cover), ...photos.slice(0, 4).map((p) => p.src)]
-    .map((src) => { const im = new Image(); im.src = src; return im; });
-  const cards = $('.intro-cards', intro);
-  let used = 0;
-  const dealCard = () => {
-    const im = pool.find((x, k) => k >= used && x.complete && x.naturalWidth);
-    if (!im) return;
-    used = pool.indexOf(im) + 1;
-    const c = document.createElement('div');
-    c.className = 'intro-card';
-    c.append(im);
-    cards.append(c);
-    gsap.fromTo(c, { yPercent: 60, scale: 0.7, rotate: gsap.utils.random(-14, 14), opacity: 0 },
-      { yPercent: 0, scale: 1, rotate: gsap.utils.random(-7, 7), opacity: 1, duration: 0.7, ease: 'expo.out' });
+  const halves = $$('.half', ld);
+  const copies = $$('.mono', ld).map((svg) => $$('.mono-stitch', svg)), needles = $$('.needle', ld);
+  const status = $$('.ld-status', ld), counts = $$('.ld-count', ld);
+  const lens = copies[0].map((el) => el.getTotalLength()), L = lens.reduce((a, b) => a + b, 0);
+  const stages = [[0, 'Cutting the pattern'], [0.22, 'Stitching'], [0.82, 'Pressing'], [0.97, 'Ready']];
+  const prog = { p: 0 };
+  let lastStage = '';
+  const render = () => {
+    const p = prog.p;
+    // Hand out the sewn length stroke by stroke; the needle sits at the tip
+    let left = p * L, tip = null;
+    lens.forEach((len, i) => {
+      const sewn = Math.max(0, Math.min(len, left)); left -= len;
+      const full = Math.floor(sewn / 16), rest = sewn - full * 16;
+      const dash = sewn <= 0 ? `0 ${len + 20}` : `${'9 7 '.repeat(full)}${Math.min(9, rest).toFixed(2)} ${(len + 20).toFixed(0)}`;
+      copies.forEach((c) => { c[i].style.strokeDasharray = dash; c[i].style.opacity = sewn > 0 ? 1 : 0; });
+      if (sewn > 0 && sewn < len + 0.01) tip = copies[0][i].getPointAtLength(sewn);
+    });
+    const bob = p < 1 ? Math.sin(performance.now() / 38) * 4 : 0;
+    if (tip) needles.forEach((n) => n.setAttribute('transform', `translate(${tip.x} ${tip.y + bob})`));
+    const txt = String(Math.round(p * 100)).padStart(3, '0');
+    counts.forEach((c) => (c.textContent = txt));
+    const st = stages.filter(([at]) => p >= at).pop()[1];
+    if (st !== lastStage) { lastStage = st; status.forEach((s) => (s.textContent = st)); }
   };
 
-  const count = { v: 0 }, out = $('.intro-count', intro);
-  const tl = gsap.timeline({ onComplete: () => { intro.remove(); lenis?.start(); } });
-  tl.fromTo('.intro-stitch', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 2.5, ease: 'power1.inOut' }, 0)
-    .fromTo('.intro-stitch b', { left: '0%' }, { left: '100%', duration: 2.5, ease: 'power1.inOut' }, 0)
-    .to(count, { v: 100, duration: 2.5, ease: 'power1.inOut', onUpdate: () => (out.textContent = String(Math.round(count.v)).padStart(3, '0')) }, 0)
-    .from('.intro-foot', { opacity: 0, duration: 0.4 }, 0);
-  gsap.set($$('.iw span', intro), { y: 0, yPercent: 110 });
-  $$('.iw span', intro).forEach((w, k) => {
-    const at = 0.1 + k * 0.5;
-    tl.call(dealCard, null, at)
-      .to(w, { yPercent: 0, duration: 0.45, ease: 'expo.out' }, at)
-      .to(w, { yPercent: -110, duration: 0.22, ease: 'power3.in' }, at + 0.28);
-  });
-  tl.call(dealCard, null, 1.6)
-    .to('.intro-card', { scale: 0.92, opacity: 0.35, filter: 'blur(6px)', duration: 0.6, ease: 'power2.out', stagger: 0.03 }, 1.65)
-    .from('.intro-hi', { opacity: 0, y: 24, duration: 0.6, ease: 'expo.out' }, 1.65)
-    .from('.intro-name span', { yPercent: 110, duration: 1, ease: 'expo.out' }, 1.7)
-    .to(['.intro-in', '.intro-bar', '.intro-cards'], { y: -50, opacity: 0, duration: 0.5, ease: 'power2.in' }, 2.75)
-    .to($$('.strip', intro), { yPercent: -100, duration: 0.85, ease: 'expo.inOut', stagger: { each: 0.07, from: 'center' } }, 2.9);
+  const snip = $('.snip', ld);
+  gsap.timeline({ onComplete: () => { ld.remove(); lenis?.start(); } })
+    .from('.ld-in', { opacity: 0, y: 16, duration: 0.5, ease: 'expo.out' }, 0)
+    .to(prog, { p: 1, duration: 2, ease: 'power1.inOut', onUpdate: render }, 0.15)
+    .to('.needle', { opacity: 0, duration: 0.25 }, 2.15)
+    .fromTo('.cut i', { scaleX: 0 }, { scaleX: 1, duration: 0.55, ease: 'power2.inOut' }, 2.25)
+    .fromTo(snip, { left: '-4%', opacity: 1 }, { left: '104%', duration: 0.55, ease: 'power2.inOut' }, 2.25)
+    .to(snip, { rotate: 14, duration: 0.07, yoyo: true, repeat: 7, ease: 'none' }, 2.25)
+    .set(['.cut', '.ld-base'], { opacity: 0 }, 2.8)
+    .to(halves[0], { yPercent: -62, rotate: -2.5, duration: 1, ease: 'expo.inOut' }, 2.8)
+    .to(halves[1], { yPercent: 62, rotate: 2.5, duration: 1, ease: 'expo.inOut' }, 2.8);
 }
 
 /* ---------- Wow: living name, thread trail, magnetic buttons ---------- */
