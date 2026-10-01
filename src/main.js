@@ -14,11 +14,12 @@ document.documentElement.classList.add('js');
 if (reduce) document.documentElement.classList.add('reduced');
 const page = document.body.dataset.page;
 
-// Opening intro: home page, once per browser session.
-let seenIntro = false;
-try { seenIntro = sessionStorage.getItem('intro') === '1'; sessionStorage.setItem('intro', '1'); } catch (e) { /* storage blocked */ }
-const showIntro = page === 'home' && !reduce && !seenIntro;
-const D = showIntro ? 3.3 : 0; // delay hero entrance until the curtain lifts
+// Every fresh load or refresh plays the stitched loader; moving between pages plays a short cut transition.
+let arrive = null;
+try { arrive = sessionStorage.getItem('pt'); sessionStorage.removeItem('pt'); sessionStorage.removeItem('intro'); } catch (e) { /* storage blocked */ }
+const showIntro = !reduce && !arrive;
+const showArrive = !reduce && !!arrive;
+const D = showIntro ? 3.3 : showArrive ? 0.75 : 0; // delay hero entrance until the curtain lifts
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const pad = (n) => String(n).padStart(2, '0');
@@ -652,39 +653,53 @@ if (finePointer && !reduce) {
   });
 }
 
-/* ---------- Loader: a monogram is stitched, then the cloth is cut open ---------- */
+/* ---------- Loader + page transitions: stitch, then cut the cloth open ---------- */
+const scissorsSvg = '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="13" r="6"/><circle cx="9" cy="35" r="6"/><path d="M14 16 44 30M14 32 44 18"/></svg>';
+// Pinking-shear zigzag; `y` is where the edge runs, as a CSS length
+const zigzag = (y, teeth = 56, amp = 9) => {
+  const pts = [];
+  for (let i = 0; i <= teeth; i++) pts.push(`${((i / teeth) * 100).toFixed(3)}% calc(${y} ${i % 2 ? '+' : '-'} ${amp}px)`);
+  return pts;
+};
+// A full-screen night cloth with the same content on both halves, ready to be cut along the middle
+function clothSplit(content) {
+  const zig = zigzag('50%');
+  const el = document.createElement('div');
+  el.className = 'loader';
+  el.setAttribute('aria-hidden', 'true');
+  el.innerHTML = `<div class="ld-base"></div>
+    <div class="half" style="clip-path:polygon(0 0, 100% 0, ${[...zig].reverse().join(', ')})">${content(0)}</div>
+    <div class="half" style="clip-path:polygon(${zig.join(', ')}, 100% 100%, 0 100%)">${content(1)}</div>
+    <div class="cut"><i></i><span class="snip">${scissorsSvg}</span></div>`;
+  document.body.append(el);
+  return el;
+}
+// Snip across, then part the halves. Returns the timeline so callers can sequence before it.
+function cutOpen(el, at, snipDur = 0.55) {
+  const halves = $$('.half', el), snip = $('.snip', el);
+  return gsap.timeline({ onComplete: () => { el.remove(); lenis?.start(); } })
+    .fromTo($('.cut i', el), { scaleX: 0 }, { scaleX: 1, duration: snipDur, ease: 'power2.inOut' }, at)
+    .fromTo(snip, { left: '-4%' }, { left: '104%', duration: snipDur, ease: 'power2.inOut' }, at)
+    .to(snip, { rotate: 14, duration: 0.07, yoyo: true, repeat: Math.round(snipDur / 0.07), ease: 'none' }, at)
+    .set([$('.cut', el), $('.ld-base', el)], { opacity: 0 }, at + snipDur)
+    .to(halves[0], { yPercent: -62, rotate: -2.5, duration: 0.95, ease: 'expo.inOut' }, at + snipDur)
+    .to(halves[1], { yPercent: 62, rotate: 2.5, duration: 0.95, ease: 'expo.inOut' }, at + snipDur);
+}
+
 if (showIntro) {
-  // Monoline "Y C H", drawn as one stitch path (each M starts a new letter stroke)
-  // (Chrome restarts dashes at every subpath, so each stroke is its own path, sewn in order)
+  // Monoline "Y C H". Chrome restarts dashes at every subpath, so each stroke is its own path, sewn in order.
   const STROKES = ['M24 18 L56 56 L88 18', 'M56 56 L56 94', 'M178 30 C160 12 122 16 120 56 C118 94 160 100 178 82', 'M212 18 L212 94', 'M212 56 L272 56', 'M272 18 L272 94'];
-  const MONO = STROKES.join(' ');
-  const scissors = '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="13" r="6"/><circle cx="9" cy="35" r="6"/><path d="M14 16 44 30M14 32 44 18"/></svg>';
-  const copy = (k) => `<div class="ld-in">
+  const ld = clothSplit(() => `<div class="ld-in">
       <svg class="mono" viewBox="0 0 296 112" aria-hidden="true">
-        <path class="mono-guide" d="${MONO}"/>
+        <path class="mono-guide" d="${STROKES.join(' ')}"/>
         ${STROKES.map((d) => `<path class="mono-stitch" d="${d}"/>`).join('')}
         <g class="needle"><line x1="0" y1="-26" x2="0" y2="0"/><circle r="3.4"/></g>
       </svg>
       <div class="ld-meta"><span class="ld-status">Threading the needle</span><span class="ld-count">000</span></div>
       <p class="ld-name">Yasar C H <span>· Fashion · Technology · Photography</span></p>
-    </div>`;
-
-  // Pinking-shear zigzag shared by both halves so they interlock exactly
-  const teeth = 56, amp = 9, zig = [];
-  for (let i = 0; i <= teeth; i++) zig.push(`${((i / teeth) * 100).toFixed(3)}% calc(50% ${i % 2 ? '+' : '-'} ${amp}px)`);
-  const topClip = `polygon(0 0, 100% 0, ${[...zig].reverse().join(', ')})`;
-  const botClip = `polygon(${zig.join(', ')}, 100% 100%, 0 100%)`;
-
-  const ld = document.createElement('div');
-  ld.className = 'loader';
-  ld.setAttribute('aria-hidden', 'true');
-  ld.innerHTML = `<div class="ld-base"></div><div class="half" style="clip-path:${topClip}">${copy(0)}</div>
-    <div class="half" style="clip-path:${botClip}">${copy(1)}</div>
-    <div class="cut"><i></i><span class="snip">${scissors}</span></div>`;
-  document.body.append(ld);
+    </div>`);
   lenis?.stop();
 
-  const halves = $$('.half', ld);
   const copies = $$('.mono', ld).map((svg) => $$('.mono-stitch', svg)), needles = $$('.needle', ld);
   const status = $$('.ld-status', ld), counts = $$('.ld-count', ld);
   const lens = copies[0].map((el) => el.getTotalLength()), L = lens.reduce((a, b) => a + b, 0);
@@ -710,17 +725,60 @@ if (showIntro) {
     if (st !== lastStage) { lastStage = st; status.forEach((s) => (s.textContent = st)); }
   };
 
-  const snip = $('.snip', ld);
-  gsap.timeline({ onComplete: () => { ld.remove(); lenis?.start(); } })
-    .from('.ld-in', { opacity: 0, y: 16, duration: 0.5, ease: 'expo.out' }, 0)
+  cutOpen(ld, 2.25)
+    .from($$('.ld-in', ld), { opacity: 0, y: 16, duration: 0.5, ease: 'expo.out' }, 0)
     .to(prog, { p: 1, duration: 2, ease: 'power1.inOut', onUpdate: render }, 0.15)
-    .to('.needle', { opacity: 0, duration: 0.25 }, 2.15)
-    .fromTo('.cut i', { scaleX: 0 }, { scaleX: 1, duration: 0.55, ease: 'power2.inOut' }, 2.25)
-    .fromTo(snip, { left: '-4%', opacity: 1 }, { left: '104%', duration: 0.55, ease: 'power2.inOut' }, 2.25)
-    .to(snip, { rotate: 14, duration: 0.07, yoyo: true, repeat: 7, ease: 'none' }, 2.25)
-    .set(['.cut', '.ld-base'], { opacity: 0 }, 2.8)
-    .to(halves[0], { yPercent: -62, rotate: -2.5, duration: 1, ease: 'expo.inOut' }, 2.8)
-    .to(halves[1], { yPercent: 62, rotate: 2.5, duration: 1, ease: 'expo.inOut' }, 2.8);
+    .to(needles, { opacity: 0, duration: 0.25 }, 2.15);
+}
+
+// Arriving from another page of the site: the cloth that covered the old page is cut open here
+if (showArrive) {
+  const safe = arrive.replace(/[<>&"]/g, '');
+  const el = clothSplit(() => `<div class="pt-in"><b class="pt-label">${safe}</b></div>`);
+  lenis?.stop();
+  cutOpen(el, 0.08, 0.4);
+}
+
+// Leaving: a pinking-edged cloth rises over the page with the destination's name, then we navigate
+const routeLabel = (url) => {
+  const path = url.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/';
+  if (path === '/project') return projects.find((p) => p.id === url.searchParams.get('id'))?.title || 'Project';
+  return { '/': 'Home', '/work': 'Work', '/garments': 'Garments', '/photography': 'Photography', '/about': 'About', '/cv': 'CV' }[path] || 'Yasar C H';
+};
+let leaving = false;
+if (!reduce) {
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href]');
+    if (!a || leaving || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    if (a.target === '_blank' || a.hasAttribute('download')) return;
+    const url = new URL(a.href, location.href);
+    if (url.origin !== location.origin || /\.(pdf|jpe?g|png)$/i.test(url.pathname)) return;
+    if (url.pathname === location.pathname && url.search === location.search) return; // same page / hash links
+    e.preventDefault();
+    leaving = true;
+    const label = routeLabel(url);
+    try { sessionStorage.setItem('pt', label); } catch (err) { location.href = url.href; return; }
+    document.body.classList.remove('menu-open');
+    lenis?.stop();
+    const top = zigzag('9px').join(', ');
+    const cover = document.createElement('div');
+    cover.className = 'pt-cover';
+    cover.setAttribute('aria-hidden', 'true');
+    cover.style.clipPath = `polygon(${top}, 100% 100%, 0 100%)`;
+    cover.innerHTML = `<div class="pt-in"><b class="pt-label">${label}</b><i class="pt-stitch"></i></div>`;
+    document.body.append(cover);
+    gsap.timeline({ onComplete: () => (location.href = url.href) })
+      .fromTo(cover, { yPercent: 102 }, { yPercent: 0, duration: 0.6, ease: 'expo.inOut' })
+      .from($('.pt-label', cover), { yPercent: 100, opacity: 0, duration: 0.5, ease: 'expo.out' }, 0.3)
+      .fromTo($('.pt-stitch', cover), { scaleX: 0 }, { scaleX: 1, duration: 0.45, ease: 'power2.inOut' }, 0.35);
+  });
+  // Coming back via the browser's back button may restore the covered page from cache
+  addEventListener('pageshow', (e) => {
+    if (!e.persisted) return;
+    $$('.pt-cover').forEach((c) => c.remove());
+    leaving = false;
+    lenis?.start();
+  });
 }
 
 /* ---------- Wow: living name, thread trail, magnetic buttons ---------- */
