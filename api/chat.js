@@ -49,6 +49,9 @@ ${projects.map((p) => `* ${p.title} — ${p.full}. Role: ${p.role}. Where: ${p.w
   ${p.scale ? `Scale: ${p.scale.map((s) => `${s.value} ${s.label}`).join('; ')}` : ''}
   ${p.impact ? `Impact: ${p.impact.map((m) => `${m.label}: ${m.from} → ${m.to}`).join('; ')}` : ''}
   Features: ${p.features.map(([t, d]) => `${t} (${d})`).join('; ')}
+  ${p.states ? `Safety states (priority order): ${p.states.map((s) => `${s.id}: ${s.when}`).join('; ')}` : ''}
+  ${p.lessons ? `Lessons learned: ${p.lessons.map(([t, d]) => `${t}: ${d}`).join(' ')}` : ''}
+  ${p.status ? `Status: ${p.status.map((s) => `${s.label}: ${s.items.join(', ')}`).join('. ')}` : ''}
   ${p.floor ? 'Deployed and in daily use on the Brandix Unit 3 sewing floor: QC staff log checks on phones, machines carry QR codes, and Yasar reviewed the analytics dashboard with the factory team.' : ''}
   Page: /project?id=${p.id}${p.live ? ` · Live site: ${p.live}` : ''}`).join('\n')}
 

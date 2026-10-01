@@ -8,6 +8,7 @@ import {
   focusAreas, tools, languages, garmentsTogether,
 } from './data.js';
 import { mountAssistant } from './assistant.js';
+import { wiringSVG, statesHTML, initMonitor } from './monitor.js';
 
 gsap.registerPlugin(ScrollTrigger);
 const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -247,6 +248,17 @@ function project() {
     </div>${i < p.flow.length - 1 ? '<span class="flow-link" aria-hidden="true"><i></i></span>' : ''}`).join('')}</div>
   </div></section>` : ''}
 
+  ${p.wiring ? `<section class="on-night sec-s"><div class="wrap">
+    <div class="head"><div><h2 class="t-1" data-reveal>Wiring <span class="serif">diagram.</span></h2><p class="lede" data-reveal>Node A reads, Node B decides. Every pin, as wired. Watch the data move.</p></div></div>
+    <div class="wiring-wrap" data-reveal>${wiringSVG()}</div>
+    <p class="wr-foot dim" data-reveal>A common ground between the two boards is essential: without it the UART link produces garbage data.</p>
+  </div></section>` : ''}
+
+  ${p.states ? `<section class="sec-s"><div class="wrap">
+    <div class="head"><div><h2 class="t-1" data-reveal>Safety <span class="serif">logic.</span></h2><p class="lede" data-reveal>Six machine states, checked in a strict order. Tap any state to see what the operator sees.</p></div></div>
+    <div data-reveal>${statesHTML(p.states)}</div>
+  </div></section>` : ''}
+
   ${p.scale ? `<section class="on-night sec-s"><div class="wrap">
     <div class="head"><h2 class="t-1" data-reveal>${p.scaleTitle || 'Built for <span class="serif">scale.</span>'}</h2></div>
     <div class="scale-grid">${p.scale.map((s) => `<div class="metric" data-reveal><div class="num"${/^[\d,]+$/.test(s.value) ? ` data-count="${s.value.replace(/,/g, '')}"` : ''}>${s.value}</div><p>${s.label}</p></div>`).join('')}</div>
@@ -260,8 +272,16 @@ function project() {
       <span class="after"><small>After</small>${m.to}</span></div>`).join('')}</div>
   </div></section>` : ''}
 
+  ${p.placement ? `<section class="sec-s"><div class="wrap">
+    <div class="head"><div><h2 class="t-1" data-reveal>Where it <span class="serif">mounts.</span></h2><p class="lede" data-reveal>Nothing is wired into the machine's control logic. Every part clips on to the existing machine.</p></div></div>
+    <div class="place">
+      <figure class="place-fig" data-reveal>${media(p.placement.src, { ratio: '1600/1029', alt: 'Sensor positions on the sewing machine' })}</figure>
+      <ol class="place-list">${p.placement.items.map((it, k) => `<li data-reveal><span>${k + 1}</span>${it}</li>`).join('')}</ol>
+    </div>
+  </div></section>` : ''}
+
   ${p.floor ? `<section class="sec-s on-white"><div class="wrap">
-    <div class="head"><div><h2 class="t-1" data-reveal>On the factory <span class="serif">floor.</span></h2><p class="lede" data-reveal>QMS in daily use at Brandix Unit 3 — on the line, at the machines and in review.</p></div></div>
+    <div class="head"><div><h2 class="t-1" data-reveal>${p.floorTitle || 'On the factory <span class="serif">floor.</span>'}</h2><p class="lede" data-reveal>${p.floorLede || 'QMS in daily use at Brandix Unit 3 — on the line, at the machines and in review.'}</p></div></div>
     <div class="floor-grid">${p.floor.map((f) => `<figure class="floor-item" data-reveal><button class="g-shot" data-src="${f.src}" aria-label="Enlarge: ${f.cap}" data-cursor="View">${media(f.src, { ratio: '3/4', alt: f.cap })}</button><figcaption>${f.cap}</figcaption></figure>`).join('')}</div>
   </div></section>
   <div class="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
@@ -275,11 +295,21 @@ function project() {
     <div class="feat-grid">${p.features.map(([t, d], k) => `<div class="feat" data-reveal><span class="ico">${pad(k + 1)}</span><h3>${t}</h3><p>${d}</p></div>`).join('')}</div>
   </div></section>
 
-  <section style="padding-bottom:clamp(48px,6vw,80px)">
+  ${p.lessons ? `<section class="on-night sec-s"><div class="wrap">
+    <div class="head"><h2 class="t-1" data-reveal>Hard <span class="serif">lessons.</span></h2></div>
+    <div class="lessons">${p.lessons.map(([t, d]) => `<div class="lesson" data-reveal><h3>${t}</h3><p>${d}</p></div>`).join('')}</div>
+  </div></section>` : ''}
+
+  ${p.status ? `<section class="sec-s"><div class="wrap">
+    <div class="head"><h2 class="t-1" data-reveal>Where it <span class="serif">stands.</span></h2></div>
+    <div class="status">${p.status.map((st, k) => `<div class="status-col${k ? ' is-next' : ''}" data-reveal><span class="mono">${st.label}</span><ul>${st.items.map((x) => `<li>${x}</li>`).join('')}</ul></div>`).join('')}</div>
+  </div></section>` : ''}
+
+  ${p.images.length > 1 ? `<section style="padding-bottom:clamp(48px,6vw,80px)">
     <div class="wrap"><div class="head"><h2 class="t-1" data-reveal>In <span class="serif">pictures.</span></h2>
       <div class="rail-ctrl" data-reveal><button class="rail-prev" aria-label="Previous images">${icon.arrowL}</button><button class="rail-next" aria-label="Next images">${icon.arrow}</button></div></div></div>
     <div class="rail" data-reveal>${p.images.map((s) => media(s, { ratio: '3/2', cls: 'wide', alt: `${p.title} screen` })).join('')}</div>
-  </section>
+  </section>` : ''}
 
   <div class="wrap"><a class="next" href="/project?id=${next.id}">
     <span><span class="dim">Next project</span><span class="t-1" style="display:block;margin-top:8px">${next.title}</span></span>
@@ -482,6 +512,10 @@ $$('a[href^="#"]').forEach((a) => a.addEventListener('click', (e) => {
 }));
 
 mountAssistant({ lenis, reduce });
+if (page === 'project') {
+  const cur = projects.find((x) => x.id === new URLSearchParams(location.search).get('id'));
+  if (cur?.wiring || cur?.states) initMonitor({ reduce, states: cur.states });
+}
 
 /* ---------- Nav + thread ---------- */
 const navEl = $('.nav'), sewn = $('.thread .sewn'), needle = $('.thread .needle'), threadEl = $('.thread');
