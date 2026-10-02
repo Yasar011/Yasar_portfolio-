@@ -13,91 +13,205 @@ const mk = (cls, html) => {
 };
 const label = (small, text) => `<div class="tr-label"><small class="mono">${small}</small><b>${letters(text)}</b></div>`;
 const labelIn = (d, at) => gsap.fromTo($$('.fl', d), { yPercent: 70, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.5, ease: 'expo.out', stagger: 0.025, delay: at });
-const labelOut = (tl, d, at) => tl.to($('.tr-label', d), { opacity: 0, y: -30, duration: 0.35, ease: 'power2.in' }, at);
 
 export const pageKind = (path) => ({ '/work': 'work', '/garments': 'garments', '/photography': 'photo', '/about': 'about', '/cv': 'cv' }[path] || null);
 
-// Octagon used by the camera aperture
-const octagon = (r) => Array.from({ length: 8 }, (_, k) => { const a = (k / 8) * Math.PI * 2 + Math.PI / 8; return `${(50 + Math.cos(a) * r).toFixed(2)},${(50 + Math.sin(a) * r).toFixed(2)}`; }).join(' ');
+/* ---------------- Unique page transitions ---------------- */
+// Overlays live on <html> (not <body>) so the page itself can be moved in 3D underneath them.
+const root = document.documentElement;
+const layer = (cls, html) => {
+  const d = document.createElement('div');
+  d.className = `tr ${cls}`; d.setAttribute('aria-hidden', 'true'); d.innerHTML = html;
+  root.append(d);
+  return d;
+};
+const W = () => innerWidth, H = () => innerHeight;
+const resetPage = () => {
+  gsap.set([document.body, '#main'], { clearProps: 'transform,filter,borderRadius,boxShadow,opacity,transformOrigin,overflow' });
+  root.style.removeProperty('background'); root.style.removeProperty('overflow');
+};
+const typeIn = (el, text, tl, at, each = 0.045) => {
+  el.textContent = '';
+  [...text].forEach((c, i) => tl.call(() => { el.textContent = text.slice(0, i + 1); }, null, at + i * each));
+};
 
-const THEMES = {
-  // Work: stacked panels rise like project cards
+const UNIQ = {
+  // WORK: the whole page shrinks into a tilted 3D card and is dealt off the deck;
+  // the next page is dealt in from the other side and expands back to full screen.
   work: {
-    build: (t) => mk('tr-panels', `${Array.from({ length: 6 }, (_, i) => `<i style="--i:${i}"></i>`).join('')}${label('SELECTED WORK', t)}`),
-    cover: (tl, d) => tl.fromTo($$('i', d), { yPercent: 101 }, { yPercent: 0, duration: 0.6, ease: 'power3.inOut', stagger: 0.05 }, 0),
-    reveal: (tl, d) => tl.to($$('i', d), { yPercent: -101, duration: 0.65, ease: 'power3.inOut', stagger: 0.05 }, 0.45),
+    cover(text, done) {
+      const lab = layer('tr-deck', label('SELECTED WORK', text));
+      root.style.background = 'radial-gradient(120% 90% at 50% 40%, #241d6b, #0b0920 70%)';
+      root.style.overflow = 'hidden';
+      gsap.set(document.body, { transformOrigin: `50% ${scrollY + H() / 2}px`, transformPerspective: 1600 });
+      gsap.timeline({ onComplete: done })
+        .to(document.body, { scale: 0.62, rotateY: -14, rotateX: 8, borderRadius: 36, boxShadow: '0 60px 120px -30px rgba(0,0,0,.8)', duration: 0.55, ease: 'power3.inOut' }, 0)
+        .to(document.body, { x: -W() * 1.25, rotateY: -48, rotateZ: -6, duration: 0.5, ease: 'power3.in' }, 0.5)
+        .add(() => labelIn(lab, 0), 0.75)
+        .to({}, { duration: 0.45 });
+    },
+    reveal(text, done) {
+      const lab = layer('tr-deck', label('SELECTED WORK', text));
+      $$('.fl', lab).forEach((f) => (f.style.opacity = 1));
+      root.style.background = 'radial-gradient(120% 90% at 50% 40%, #241d6b, #0b0920 70%)';
+      root.style.overflow = 'hidden';
+      gsap.set(document.body, { transformOrigin: `50% ${H() / 2}px`, transformPerspective: 1600, x: W() * 1.25, scale: 0.62, rotateY: 48, rotateZ: 6, rotateX: 8, borderRadius: 36, boxShadow: '0 60px 120px -30px rgba(0,0,0,.8)' });
+      gsap.timeline({ onComplete: () => { lab.remove(); resetPage(); done?.(); } })
+        .to($('.tr-label', lab), { opacity: 0, scale: 0.9, duration: 0.35, ease: 'power2.in' }, 0.15)
+        .to(document.body, { x: 0, rotateY: 12, rotateZ: 0, duration: 0.6, ease: 'power3.out' }, 0.3)
+        .to(document.body, { rotateY: 0, rotateX: 0, scale: 1, borderRadius: 0, boxShadow: '0 0 0 0 rgba(0,0,0,0)', duration: 0.6, ease: 'power3.inOut' }, 0.85);
+    },
   },
-  // Garments: a satin drape falls, its hem stitched as it lands
+
+  // GARMENTS: a needle sews a zig-zag stitch across the screen; the thread swells into
+  // cloth that covers everything. On arrival the cloth shrinks back to thread and unravels.
   garments: {
-    build: (t) => mk('tr-drape', `<svg class="dr-svg" viewBox="0 0 100 100" preserveAspectRatio="none"><defs><linearGradient id="drg" x1="0" x2="1"><stop offset="0" stop-color="#5b2140"/><stop offset=".25" stop-color="#9b5d8f"/><stop offset=".5" stop-color="#6e2a55"/><stop offset=".75" stop-color="#a873a0"/><stop offset="1" stop-color="#5b2140"/></linearGradient></defs>
-      <path class="dr-cloth" fill="url(#drg)" d="M0 0 H100 V0 Q75 0 50 0 Q25 0 0 0 Z"/><path class="dr-hem" fill="none" stroke="#f3d9ea" stroke-width=".5" stroke-dasharray="1.6 1.2" vector-effect="non-scaling-stroke" d="M0 0 Q25 0 50 0 Q75 0 100 0"/></svg>
-      ${label('MADE BY HAND', t)}`),
-    cover: (tl, d) => {
-      const cloth = $('.dr-cloth', d), hem = $('.dr-hem', d);
-      tl.to(cloth, { attr: { d: 'M0 0 H100 V70 Q75 92 50 80 Q25 68 0 88 Z' }, duration: 0.45, ease: 'power2.in' }, 0)
-        .to(hem, { attr: { d: 'M0 86 Q25 66 50 78 Q75 90 100 68' }, duration: 0.45, ease: 'power2.in' }, 0)
-        .to(cloth, { attr: { d: 'M0 0 H100 V100 Q75 100 50 100 Q25 100 0 100 Z' }, duration: 0.4, ease: 'power2.out' }, 0.45)
-        .to(hem, { attr: { d: 'M0 98 Q25 98 50 98 Q75 98 100 98' }, duration: 0.4, ease: 'power2.out' }, 0.45);
+    build(text) {
+      const w = W(), h = H(), rows = 6, amp = h / rows / 2.2;
+      let d = '';
+      for (let r = 0; r < rows; r++) {
+        const y = (r + 0.5) * (h / rows), ltr = r % 2 === 0, steps = 14;
+        for (let k = 0; k <= steps; k++) {
+          const x = ltr ? -40 + (k / steps) * (w + 80) : w + 40 - (k / steps) * (w + 80);
+          d += `${r === 0 && k === 0 ? 'M' : 'L'}${x.toFixed(1)} ${(y + (k % 2 ? -amp : amp)).toFixed(1)} `;
+        }
+      }
+      return layer('tr-sew', `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><defs><linearGradient id="sewg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#5b2140"/><stop offset=".5" stop-color="#a0558f"/><stop offset="1" stop-color="#3f1530"/></linearGradient></defs>
+        <rect class="sew-cloth" width="${w}" height="${h}" fill="url(#sewg)" opacity="0"/>
+        <path class="sew-thread" d="${d}" fill="none" stroke="url(#sewg)" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+        <path class="sew-stitch" d="${d}" fill="none" stroke="#f3d9ea" stroke-width="1.5" stroke-dasharray="7 9" opacity="0"/>
+        <g class="sew-needle"><line x1="0" y1="-34" x2="0" y2="6" stroke="#e9eef2" stroke-width="3" stroke-linecap="round"/><circle r="5" fill="#fff"/></g></svg>${label('MADE BY HAND', text)}`);
     },
-    reveal: (tl, d) => {
-      const cloth = $('.dr-cloth', d), hem = $('.dr-hem', d);
-      tl.set(cloth, { attr: { d: 'M0 0 H100 V100 Q75 100 50 100 Q25 100 0 100 Z' } }, 0).set(hem, { attr: { d: 'M0 98 Q25 98 50 98 Q75 98 100 98' } }, 0)
-        .to(cloth, { attr: { d: 'M0 0 H100 V30 Q75 12 50 26 Q25 40 0 18 Z' }, duration: 0.45, ease: 'power2.in' }, 0.45)
-        .to(hem, { attr: { d: 'M0 16 Q25 38 50 24 Q75 10 100 28' }, duration: 0.45, ease: 'power2.in' }, 0.45)
-        .to(cloth, { attr: { d: 'M0 0 H100 V0 Q75 0 50 0 Q25 0 0 0 Z' }, duration: 0.35, ease: 'power2.out' }, 0.9)
-        .to(hem, { attr: { d: 'M0 0 Q25 0 50 0 Q75 0 100 0' }, opacity: 0, duration: 0.35, ease: 'power2.out' }, 0.9);
+    cover(text, done) {
+      const d = this.build(text), thread = $('.sew-thread', d), needle = $('.sew-needle', d), L = thread.getTotalLength(), o = { p: 0 };
+      thread.style.strokeDasharray = `${L} ${L}`; thread.style.strokeDashoffset = L;
+      gsap.timeline({ onComplete: done })
+        .to(o, { p: 1, duration: 0.85, ease: 'power1.inOut', onUpdate: () => { thread.style.strokeDashoffset = L * (1 - o.p); const pt = thread.getPointAtLength(L * o.p); needle.setAttribute('transform', `translate(${pt.x} ${pt.y})`); } }, 0)
+        .to(thread, { strokeWidth: H() / 2.4, duration: 0.45, ease: 'power3.in' }, 0.7)
+        .to(needle, { opacity: 0, duration: 0.2 }, 0.85)
+        .set($('.sew-cloth', d), { opacity: 1 }, 1.15)
+        .to($('.sew-stitch', d), { opacity: 0.55, duration: 0.3 }, 1.1)
+        .add(() => labelIn(d, 0), 1.05)
+        .to({}, { duration: 0.4 });
+    },
+    reveal(text, done) {
+      const d = this.build(text), thread = $('.sew-thread', d), L = thread.getTotalLength();
+      $$('.fl', d).forEach((f) => (f.style.opacity = 1));
+      gsap.set($('.sew-cloth', d), { opacity: 1 }); gsap.set(thread, { strokeWidth: H() / 2.4 }); gsap.set($('.sew-needle', d), { opacity: 0 });
+      thread.style.strokeDasharray = `${L} ${L}`; thread.style.strokeDashoffset = 0;
+      gsap.timeline({ onComplete: () => { d.remove(); done?.(); } })
+        .to($('.tr-label', d), { opacity: 0, y: -24, duration: 0.3, ease: 'power2.in' }, 0.15)
+        .set($('.sew-cloth', d), { opacity: 0 }, 0.4)
+        .to($('.sew-stitch', d), { opacity: 0, duration: 0.2 }, 0.4)
+        .to(thread, { strokeWidth: 4, duration: 0.45, ease: 'power3.out' }, 0.4)
+        .to(thread, { strokeDashoffset: -L, duration: 0.7, ease: 'power2.in' }, 0.75);
     },
   },
-  // Photography: a camera aperture closes, then opens with a flash
+
+  // PHOTOGRAPHY: a camera viewfinder frames the page, focus slips, the shutter fires;
+  // the next page appears through the viewfinder and pulls into sharp focus.
   photo: {
-    build: (t) => mk('tr-shutter', `<svg class="sh-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice"><defs><mask id="sh-m"><rect width="100" height="100" fill="#fff"/><polygon class="sh-hole" fill="#000" points="${octagon(80)}"/></mask></defs>
-      <rect width="100" height="100" fill="#0b0b0f" mask="url(#sh-m)"/>
-      <g class="sh-blades">${Array.from({ length: 8 }, (_, k) => `<line x1="50" y1="50" x2="${50 + Math.cos(k * 0.785) * 80}" y2="${50 + Math.sin(k * 0.785) * 80}" stroke="#2a2a33" stroke-width=".35"/>`).join('')}</g></svg>
-      <div class="sh-flash"></div>${label('THROUGH THE LENS', t)}`),
-    cover: (tl, d) => {
-      const hole = $('.sh-hole', d), o = { r: 80 };
-      tl.to(o, { r: 0, duration: 0.6, ease: 'power3.in', onUpdate: () => hole.setAttribute('points', octagon(o.r)) }, 0)
-        .fromTo($('.sh-blades', d), { rotate: 0, transformOrigin: '50% 50%' }, { rotate: 45, duration: 0.6, ease: 'power3.in' }, 0);
+    build(text) {
+      return layer('tr-vf', `<div class="vf-black"></div><div class="vf-grid"></div>
+        <i class="vf-c c-tl"></i><i class="vf-c c-tr"></i><i class="vf-c c-bl"></i><i class="vf-c c-br"></i><i class="vf-focus"></i>
+        <div class="vf-hud mono"><span class="vf-rec">● REC</span><span>ISO 400 · f/4 · 1/250</span><span>Nikon Z6 II</span></div>
+        <div class="vf-flash"></div>${label('THROUGH THE LENS', text)}`);
     },
-    reveal: (tl, d) => {
-      const hole = $('.sh-hole', d), o = { r: 0 };
-      hole.setAttribute('points', octagon(0));
-      tl.fromTo($('.sh-flash', d), { opacity: 0 }, { opacity: 0.9, duration: 0.08, yoyo: true, repeat: 1 }, 0.45)
-        .to(o, { r: 80, duration: 0.7, ease: 'power3.out', onUpdate: () => hole.setAttribute('points', octagon(o.r)) }, 0.55)
-        .fromTo($('.sh-blades', d), { rotate: 45, transformOrigin: '50% 50%' }, { rotate: 0, opacity: 0, duration: 0.7, ease: 'power3.out' }, 0.55);
+    cover(text, done) {
+      const d = this.build(text);
+      gsap.timeline({ onComplete: done })
+        .fromTo($$('.vf-c', d), { scale: 2.2, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.45, ease: 'expo.out' }, 0)
+        .fromTo([$('.vf-hud', d), $('.vf-grid', d)], { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0.1)
+        .fromTo($('.vf-focus', d), { scale: 1.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'back.out(2)' }, 0.2)
+        .to('#main', { filter: 'blur(14px) saturate(1.4)', scale: 1.05, duration: 0.5, ease: 'power2.in' }, 0.15)
+        .fromTo($('.vf-flash', d), { opacity: 0 }, { opacity: 1, duration: 0.07 }, 0.62)
+        .set($('.vf-black', d), { opacity: 1 }, 0.69)
+        .to($('.vf-flash', d), { opacity: 0, duration: 0.35 }, 0.7)
+        .add(() => labelIn(d, 0), 0.75)
+        .to({}, { duration: 0.6 });
+    },
+    reveal(text, done) {
+      const d = this.build(text);
+      $$('.fl', d).forEach((f) => (f.style.opacity = 1));
+      gsap.set($('.vf-black', d), { opacity: 1 });
+      gsap.set('#main', { filter: 'blur(18px) brightness(1.3)', scale: 1.06, transformOrigin: `50% ${H() / 2}px` });
+      gsap.timeline({ onComplete: () => { d.remove(); resetPage(); done?.(); } })
+        .to($('.tr-label', d), { opacity: 0, duration: 0.25 }, 0.15)
+        .to($('.vf-black', d), { opacity: 0, duration: 0.35, ease: 'power2.out' }, 0.35)
+        .fromTo($$('.vf-c', d), { scale: 1.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'expo.out' }, 0.35)
+        .fromTo([$('.vf-hud', d), $('.vf-grid', d), $('.vf-focus', d)], { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0.4)
+        .to('#main', { filter: 'blur(0px) brightness(1)', scale: 1, duration: 0.8, ease: 'power3.out' }, 0.45)
+        .call(() => d.classList.add('is-locked'), null, 1.05)
+        .to([...$$('.vf-c', d), $('.vf-hud', d), $('.vf-grid', d), $('.vf-focus', d)], { opacity: 0, duration: 0.35 }, 1.35);
     },
   },
-  // About: venetian blinds slide shut from alternating sides
+
+  // ABOUT: liquid blobs drip and merge (gooey metaballs) until they flood the screen,
+  // then split back into droplets and drain away.
   about: {
-    build: (t) => mk('tr-blinds', `${Array.from({ length: 9 }, (_, i) => `<i class="${i % 2 ? 'r' : 'l'}"></i>`).join('')}${label('HI, I’M YASAR', t)}`),
-    cover: (tl, d) => tl.fromTo($$('i', d), { xPercent: (i) => (i % 2 ? 101 : -101) }, { xPercent: 0, duration: 0.55, ease: 'power3.inOut', stagger: 0.04 }, 0),
-    reveal: (tl, d) => tl.to($$('i', d), { xPercent: (i) => (i % 2 ? -101 : 101), duration: 0.6, ease: 'power3.inOut', stagger: 0.04 }, 0.45),
+    build(text) {
+      const w = W(), h = H();
+      const blobs = Array.from({ length: 14 }, (_, i) => {
+        const x = (0.08 + 0.84 * ((i * 0.618) % 1)) * w, y = (0.1 + 0.8 * ((i * 0.382 + 0.2) % 1)) * h;
+        return `<circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="0"/>`;
+      }).join('');
+      return layer('tr-goo', `<svg viewBox="0 0 ${w} ${h}"><defs><filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="16"/><feColorMatrix values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 26 -11"/></filter>
+        <linearGradient id="goog" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3a2cf5"/><stop offset=".55" stop-color="#7b3cf0"/><stop offset="1" stop-color="#d43f9a"/></linearGradient></defs>
+        <g filter="url(#goo)" fill="url(#goog)">${blobs}</g></svg>${label('HI, I’M YASAR', text)}`);
+    },
+    cover(text, done) {
+      const d = this.build(text), R = Math.hypot(W(), H()) * 0.42;
+      gsap.timeline({ onComplete: done })
+        .to($$('circle', d), { attr: { r: R }, duration: 0.9, ease: 'power2.in', stagger: { each: 0.035, from: 'random' } }, 0)
+        .add(() => labelIn(d, 0), 0.85)
+        .to({}, { duration: 0.45 });
+    },
+    reveal(text, done) {
+      const d = this.build(text), R = Math.hypot(W(), H()) * 0.42;
+      $$('.fl', d).forEach((f) => (f.style.opacity = 1));
+      gsap.set($$('circle', d), { attr: { r: R } });
+      gsap.timeline({ onComplete: () => { d.remove(); done?.(); } })
+        .to($('.tr-label', d), { opacity: 0, scale: 0.9, duration: 0.3, ease: 'power2.in' }, 0.15)
+        .to($$('circle', d), { attr: { r: 0, cy: `+=${H() * 0.25}` }, duration: 0.9, ease: 'power2.inOut', stagger: { each: 0.03, from: 'random' } }, 0.35);
+    },
   },
-  // CV: a sheet of paper prints up, its lines typing in
+
+  // CV: a typewriter. Lines are typed onto a sheet with a moving carriage, the title is typed
+  // letter by letter with a cursor; on arrival the carriage returns line by line, uncovering the page.
   cv: {
-    build: (t) => mk('tr-paper', `<div class="pp-bg"></div><div class="pp-sheet"><div class="pp-head"><b>Yasar C H</b><span>Curriculum Vitae</span></div>${Array.from({ length: 11 }, (_, i) => `<i style="width:${[92, 70, 84, 60, 88, 76, 94, 66, 80, 58, 72][i]}%"></i>`).join('')}</div>${label('CURRICULUM VITAE', t)}`),
-    cover: (tl, d) => tl.fromTo($('.pp-bg', d), { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0)
-      .fromTo($('.pp-sheet', d), { yPercent: 120, rotate: 3 }, { yPercent: 0, rotate: 0, duration: 0.6, ease: 'power3.out' }, 0.05)
-      .fromTo($$('.pp-sheet i', d), { scaleX: 0 }, { scaleX: 1, duration: 0.25, ease: 'power2.out', stagger: 0.03 }, 0.35),
-    reveal: (tl, d) => tl.to($('.pp-sheet', d), { yPercent: -130, rotate: -2, duration: 0.6, ease: 'power3.in' }, 0.4)
-      .to($('.pp-bg', d), { opacity: 0, duration: 0.4 }, 0.75),
+    build(text) {
+      const rows = 14;
+      return layer('tr-type', `<div class="ty-rows">${Array.from({ length: rows }, () => '<i></i>').join('')}</div><div class="ty-head"></div>
+        <div class="tr-label"><small class="mono">CURRICULUM VITAE</small><b class="ty-text"></b><span class="ty-cursor"></span></div>`);
+    },
+    cover(text, done) {
+      const d = this.build(text), rows = $$('.ty-rows i', d), head = $('.ty-head', d), tl = gsap.timeline({ onComplete: done });
+      rows.forEach((r, i) => {
+        const at = i * 0.045;
+        tl.fromTo(r, { scaleX: 0 }, { scaleX: 1, duration: 0.16, ease: 'none' }, at)
+          .set(head, { top: `${(i + 1) * (100 / rows)}%` }, at);
+      });
+      tl.to(head, { opacity: 0, duration: 0.2 }, 0.7);
+      typeIn($('.ty-text', d), text, tl, 0.75, 0.07);
+      tl.to({}, { duration: 0.45 });
+    },
+    reveal(text, done) {
+      const d = this.build(text), rows = $$('.ty-rows i', d), head = $('.ty-head', d);
+      $('.ty-text', d).textContent = text;
+      const tl = gsap.timeline({ onComplete: () => { d.remove(); done?.(); } });
+      tl.to($('.tr-label', d), { opacity: 0, duration: 0.25 }, 0.2);
+      rows.forEach((r, i) => {
+        const at = 0.35 + i * 0.045;
+        tl.to(r, { xPercent: 101, duration: 0.22, ease: 'power3.in' }, at).set(head, { top: `${(i + 1) * (100 / rows)}%`, opacity: 1 }, at);
+      });
+      tl.to(head, { opacity: 0, duration: 0.2 }, 0.35 + rows.length * 0.045);
+    },
   },
 };
 
-export function pageCover(kind, text, done) {
-  const th = THEMES[kind], d = th.build(text);
-  const tl = gsap.timeline({ onComplete: done });
-  th.cover(tl, d);
-  labelIn(d, 0.35);
-  tl.to({}, { duration: 0.35 });
-}
-
-export function pageReveal(kind, text, done) {
-  const th = THEMES[kind], d = th.build(text);
-  const tl = gsap.timeline({ onComplete: () => { d.remove(); done?.(); } });
-  labelOut(tl, d, 0.25);
-  th.reveal(tl, d);
-}
+export function pageCover(kind, text, done) { UNIQ[kind].cover(text, done); }
+export function pageReveal(kind, text, done) { UNIQ[kind].reveal(text, done); }
+export const resetPageTransform = resetPage;
 
 /* ---------------- Entrance animations per page ---------------- */
 // Each takes elements out of the generic fade-up and gives them their own motion.

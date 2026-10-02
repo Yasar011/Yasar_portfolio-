@@ -733,7 +733,7 @@ section { position: relative; }
 .ld-stitch b { position: absolute; top: 50%; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 6px rgba(181, 140, 255, 0.35), 0 0 30px 8px rgba(255, 95, 162, 0.7); }
 
 /* ============ Themed transitions ============ */
-.tr { position: fixed; inset: 0; z-index: 160; pointer-events: none; display: grid; place-items: center; overflow: hidden; }
+.tr { font-family: var(--f-sans); -webkit-font-smoothing: antialiased; position: fixed; inset: 0; z-index: 160; pointer-events: none; display: grid; place-items: center; overflow: hidden; }
 .tr-label { position: relative; z-index: 3; text-align: center; color: #fff; padding: 0 var(--gutter); }
 .tr-label > b { display: block; font-size: clamp(2.6rem, 8vw, 7.2rem); font-weight: 650; letter-spacing: -0.05em; line-height: 1.02; text-wrap: balance; max-width: 14ch; margin: 0 auto; }
 .tr-label .flw, .p-hero .t-hero .tw { display: inline-block; white-space: nowrap; }
@@ -931,3 +931,31 @@ section { position: relative; }
 .tr-paper .tr-label { position: absolute; bottom: 8vh; left: 0; right: 0; }
 .tr-paper .tr-label > b { font-size: clamp(2rem, 5vw, 4rem); }
 .tr-paper small { color: #a99dff; }
+
+/* ============ Unique page transitions ============ */
+.tr-deck { z-index: 210; }
+.tr-deck small { color: #a99dff; }
+.tr-sew svg, .tr-goo svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.tr-sew small { color: #f3d9ea; }
+.tr-goo small { color: #fff; opacity: .8; }
+.tr-vf .vf-black { position: absolute; inset: 0; background: #050507; opacity: 0; }
+.tr-vf .vf-grid { position: absolute; inset: 6vh 6vw; opacity: 0; background:
+  linear-gradient(90deg, transparent calc(33.3% - .5px), rgba(255,255,255,.35) calc(33.3% - .5px) calc(33.3% + .5px), transparent calc(33.3% + .5px) calc(66.6% - .5px), rgba(255,255,255,.35) calc(66.6% - .5px) calc(66.6% + .5px), transparent calc(66.6% + .5px)),
+  linear-gradient(180deg, transparent calc(33.3% - .5px), rgba(255,255,255,.35) calc(33.3% - .5px) calc(33.3% + .5px), transparent calc(33.3% + .5px) calc(66.6% - .5px), rgba(255,255,255,.35) calc(66.6% - .5px) calc(66.6% + .5px), transparent calc(66.6% + .5px)); }
+.tr-vf .vf-c { position: absolute; width: 64px; height: 64px; border: 3px solid #fff; opacity: 0; filter: drop-shadow(0 0 4px rgba(0,0,0,.6)); }
+.tr-vf .vf-c.c-tl { top: 5vh; left: 5vw; border-right: 0; border-bottom: 0; } .tr-vf .vf-c.c-tr { top: 5vh; right: 5vw; border-left: 0; border-bottom: 0; }
+.tr-vf .vf-c.c-bl { bottom: 5vh; left: 5vw; border-right: 0; border-top: 0; } .tr-vf .vf-c.c-br { bottom: 5vh; right: 5vw; border-left: 0; border-top: 0; }
+.tr-vf .vf-focus { position: absolute; left: 50%; top: 50%; width: 110px; height: 76px; margin: -38px 0 0 -55px; border: 2px solid #ffd166; border-radius: 6px; opacity: 0; transition: border-color .2s; }
+.tr-vf.is-locked .vf-focus { border-color: #2fd27a; box-shadow: 0 0 0 4px rgba(47,210,122,.25); }
+.tr-vf .vf-hud { position: absolute; left: 0; right: 0; bottom: 6vh; display: flex; justify-content: center; gap: 28px; color: #fff; font-size: 13px; opacity: 0; text-shadow: 0 1px 4px rgba(0,0,0,.7); }
+.tr-vf .vf-rec { color: #ff4d4d; animation: blink 1s steps(2) infinite; }
+.tr-vf .vf-flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+.tr-vf small { color: #ffd166; }
+.tr-type { background: transparent; }
+.tr-type .ty-rows { position: absolute; inset: 0; display: grid; }
+.tr-type .ty-rows i { display: block; transform-origin: left; background: #121216; border-bottom: 1px solid rgba(255,255,255,.04); background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 2px, transparent 2px 14px); }
+.tr-type .ty-head { position: absolute; left: 0; right: 0; top: 0; height: 3px; margin-top: -2px; background: #a99dff; box-shadow: 0 0 16px 4px rgba(124,111,255,.7); z-index: 2; }
+.tr-type .tr-label { display: flex; flex-direction: column; align-items: center; }
+.tr-type .ty-text { font-family: var(--f-mono); font-weight: 500; letter-spacing: -0.02em; min-height: 1.1em; }
+.tr-type .ty-cursor { display: inline-block; width: .6em; height: 6px; margin-top: 10px; background: #a99dff; animation: blink .8s steps(2) infinite; }
+.tr-type small { color: #a99dff; }
