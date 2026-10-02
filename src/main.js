@@ -9,7 +9,7 @@ import {
 } from './data.js';
 import { mountAssistant } from './assistant.js';
 import { wiringSVG, statesHTML, initMonitor } from './monitor.js';
-import { demoHTML, initDemos, pcbSVG, initPCB, initProjectFx, initTilt, introParticles } from './fx.js';
+import { demoHTML, initDemos, pcbSVG, initPCB, initProjectFx, initTilt } from './fx.js';
 import { projectKind, cover as themedCover, reveal as themedReveal } from './transitions.js';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -24,7 +24,7 @@ let arriveKind = null;
 try { arrive = sessionStorage.getItem('pt'); arriveKind = sessionStorage.getItem('ptk'); sessionStorage.removeItem('pt'); sessionStorage.removeItem('ptk'); sessionStorage.removeItem('intro'); } catch (e) { /* storage blocked */ }
 const showIntro = !reduce && !arrive;
 const showArrive = !reduce && !!arrive;
-const D = showIntro ? 3.1 : showArrive ? (arriveKind ? 0.75 : 0.55) : 0; // delay hero entrance until the curtain lifts
+const D = showIntro ? 3.4 : showArrive ? (arriveKind ? 0.75 : 0.55) : 0; // delay hero entrance until the curtain lifts
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const pad = (n) => String(n).padStart(2, '0');
@@ -814,71 +814,51 @@ function lift(el, at) {
 }
 
 if (showIntro) {
-  // The full name is dyed: an outline first, then indigo rises through the letters with a moving wave on top
-  const W = 1200, H = 260, NAME = 'Yasar C H';
-  const wave = (() => {
-    // A wave twice the width so it can slide sideways forever, closed down to well below the letters
-    let d = `M0 0`;
-    for (let x = 0; x <= W * 2; x += 60) d += ` Q${x + 30} ${(x / 60) % 2 ? 14 : -14} ${x + 60} 0`;
-    return `${d} L${W * 2 + 60} ${H * 2} L0 ${H * 2} Z`;
-  })();
-  const ld = veil(`<div class="dye">
-      <svg class="dye-svg" viewBox="0 0 ${W} ${H}" aria-hidden="true">
-        <defs><clipPath id="dye-clip"><path class="dye-wave" d="${wave}"/></clipPath>
-          <linearGradient id="dye-grad" x1="0" y1="0" x2="1" y2="0" spreadMethod="repeat"><stop offset="0" stop-color="#6c61ff"/><stop offset=".33" stop-color="#b56cff"/><stop offset=".66" stop-color="#ff5fa2"/><stop offset="1" stop-color="#6c61ff"/></linearGradient>
-          <linearGradient id="dye-shine" gradientUnits="userSpaceOnUse" x1="-400" y1="0" x2="-100" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".95"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
-        <text class="dye-outline" x="${W / 2}" y="${H * 0.78}" text-anchor="middle">${NAME}</text>
-        <g clip-path="url(#dye-clip)"><text class="dye-fill" x="${W / 2}" y="${H * 0.78}" text-anchor="middle">${NAME}</text></g>
-        <text class="dye-shine" x="${W / 2}" y="${H * 0.78}" text-anchor="middle">${NAME}</text>
-      </svg>
-      <div class="intro-stitch ld-stitch"><i></i><b></b></div>
-      <div class="ld-meta"><span class="ld-status">Weaving</span><span class="ld-count">000</span></div>
-      <p class="ld-name">Fashion Technology · NIFT Jodhpur <span>· Portfolio ${new Date().getFullYear()}</span></p>
-    </div>`, true);
+  // Intro: the name lands in light, the camera dives into the "y" monogram,
+  // and it bursts into coloured threads that weave a fabric, which then pulls apart onto the page.
+  const NAME = 'Yasar C H';
+  const COLORS = ['#3a2cf5', '#6c61ff', '#9b7bff', '#c13bff', '#ff4f8b', '#ff8a5c', '#19c8ff', '#7cf2d0'];
+  const nf = document.createElement('div');
+  nf.className = 'nf';
+  nf.setAttribute('aria-hidden', 'true');
+  nf.innerHTML = `<div class="nf-warp">${Array.from({ length: 44 }, () => '<i></i>').join('')}</div>
+    <div class="nf-weft">${Array.from({ length: 26 }, () => '<i></i>').join('')}</div>
+    <div class="nf-word"><span class="nf-mark">y</span>${[...NAME].map((c) => (c === ' ' ? '<span class="nf-sp"></span>' : `<span class="nf-ch">${c}</span>`)).join('')}</div>
+    <div class="nf-sub">Fashion · Technology · Photography</div>`;
+  document.body.append(nf);
   lenis?.stop();
-  // Glowing orbs and rising dye particles behind the name
-  const fx = document.createElement('div');
-  fx.className = 'ld-fx';
-  fx.innerHTML = '<i class="orb o1"></i><i class="orb o2"></i><i class="orb o3"></i><canvas></canvas>';
-  ld.insertBefore(fx, $('.veil-in', ld));
-  const stopParticles = introParticles($('canvas', fx));
 
-  const svg = $('.dye-svg', ld), waveEl = $('.dye-wave', ld), status = $('.ld-status', ld), count = $('.ld-count', ld);
-  // Fit the viewBox to the real text once the face is ready, so the name always fills the width
-  const fit = () => {
-    const b = $('.dye-outline', ld).getBBox();
-    if (b.width) svg.setAttribute('viewBox', `${b.x - 10} ${b.y - 10} ${b.width + 20} ${b.height + 20}`);
+  const word = $('.nf-word', nf), mark = $('.nf-mark', nf), chars = $$('.nf-ch', nf);
+  const warp = $$('.nf-warp i', nf), weft = $$('.nf-weft i', nf);
+  const paint = (el, i, dir) => {
+    const c = COLORS[i % COLORS.length], c2 = COLORS[(i * 5 + 2) % COLORS.length], th = 0.35 + Math.random() * 1.6;
+    el.style[dir === 'v' ? 'width' : 'height'] = `${th}${dir === 'v' ? 'vw' : 'vh'}`;
+    el.style[dir === 'v' ? 'left' : 'top'] = `${(i + 0.5) * (100 / (dir === 'v' ? warp.length : weft.length))}%`;
+    el.style.background = `linear-gradient(${dir === 'v' ? 180 : 90}deg, transparent, ${c} 15%, ${c2} 55%, ${c} 85%, transparent)`;
+    el.style.boxShadow = `0 0 ${14 + th * 10}px ${c}`;
   };
-  fit();
-  document.fonts?.ready.then(fit);
+  warp.forEach((el, i) => paint(el, i, 'v'));
+  weft.forEach((el, i) => paint(el, i, 'h'));
 
-  const stages = [[0, 'Weaving'], [0.18, 'Dyeing'], [0.86, 'Finishing'], [0.98, 'Ready']];
-  const prog = { p: 0 };
-  const render = () => {
-    const p = prog.p;
-    // Dye level: from below the baseline to above the cap height
-    const level = H * 0.92 - p * H * 0.92;
-    const drift = -((performance.now() / 6) % 120);
-    waveEl.setAttribute('transform', `translate(${drift} ${level})`);
-    count.textContent = String(Math.round(p * 100)).padStart(3, '0');
-    const st = stages.filter(([at]) => p >= at).pop()[1];
-    if (status.textContent !== st) status.textContent = st;
-  };
-  render();
-
-  const grad = $('#dye-grad', ld), shine = $('#dye-shine', ld);
-  gsap.to(grad, { attr: { x1: -1, x2: 0 }, duration: 1.6, ease: 'none', repeat: -1 });
-  lift(ld, 2.65)
-    .eventCallback('onComplete', () => { stopParticles(); ld.remove(); lenis?.start(); })
-    .to(fx, { opacity: 0, scale: 1.15, duration: 0.6, ease: 'power2.in' }, 2.6)
-    .fromTo($('.ld-stitch', ld), { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 1.9, ease: 'power1.inOut' }, 0.3)
-    .fromTo($('.ld-stitch b', ld), { left: '0%' }, { left: '100%', duration: 1.9, ease: 'power1.inOut' }, 0.3)
-    .fromTo(shine, { attr: { x1: -400, x2: -100 } }, { attr: { x1: 1300, x2: 1600 }, duration: 0.75, ease: 'power2.inOut' }, 2.0)
-    .fromTo($('.dye-svg', ld), { scale: 1 }, { scale: 1.04, duration: 0.35, yoyo: true, repeat: 1, ease: 'power2.out', transformOrigin: '50% 60%' }, 2.0)
-    .from($('.dye', ld), { opacity: 0, y: 24, filter: 'blur(8px)', duration: 0.8, ease: 'expo.out' }, 0)
-    .fromTo($('.dye-outline', ld), { strokeDasharray: '0 1200' }, { strokeDasharray: '1200 0', duration: 1.1, ease: 'power2.inOut' }, 0)
-    .to(prog, { p: 1, duration: 1.95, ease: 'power1.inOut', onUpdate: render }, 0.3)
-    .to($('.dye-fill', ld), { attr: { fill: '#ffffff' }, duration: 0.35, ease: 'power1.out' }, 2.05);
+  gsap.timeline({ onComplete: () => { nf.remove(); lenis?.start(); } })
+    // 1. Monogram, then the name rises out of the dark
+    .from(mark, { opacity: 0, scale: 0.4, rotate: -20, duration: 0.7, ease: 'back.out(2)' }, 0.1)
+    .from(chars, { opacity: 0, y: 40, filter: 'blur(14px)', duration: 0.7, ease: 'expo.out', stagger: 0.05 }, 0.35)
+    .from($('.nf-sub', nf), { opacity: 0, letterSpacing: '0.7em', duration: 0.9, ease: 'expo.out' }, 0.8)
+    // 2. A sweep of light across the name
+    .fromTo(word, { '--sx': '-30%' }, { '--sx': '130%', duration: 0.8, ease: 'power2.inOut' }, 1.05)
+    // 3. Everything but the monogram falls away; dive into the "y"
+    .to([...chars, $('.nf-sub', nf)], { opacity: 0, y: 20, filter: 'blur(8px)', duration: 0.4, ease: 'power2.in', stagger: 0.02 }, 1.7)
+    .set(word, { transformOrigin: () => { const r = mark.getBoundingClientRect(), w = word.getBoundingClientRect(); return `${r.left - w.left + r.width / 2}px ${r.top - w.top + r.height * 0.5}px`; } }, 1.75)
+    .to(word, { scale: 30, rotate: 8, duration: 1.0, ease: 'power3.in' }, 1.8)
+    .to(mark, { opacity: 0, duration: 0.2 }, 2.55)
+    // 4. Threads shoot out and weave a fabric
+    .fromTo(warp, { scaleY: 0, opacity: 0 }, { scaleY: 1, opacity: 1, duration: 0.7, ease: 'expo.out', stagger: { each: 0.008, from: 'center' } }, 2.4)
+    .fromTo(weft, { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 0.9, duration: 0.7, ease: 'expo.out', stagger: { each: 0.012, from: 'center' } }, 2.5)
+    // 5. The fabric pulls apart: warp threads fly up and down, weft threads fly sideways
+    .to(warp, { yPercent: (i) => (i % 2 ? -120 : 120), duration: 0.7, ease: 'power3.in', stagger: { each: 0.006, from: 'center' } }, 3.0)
+    .to(weft, { xPercent: (i) => (i % 2 ? -120 : 120), duration: 0.7, ease: 'power3.in', stagger: { each: 0.01, from: 'center' } }, 3.0)
+    .to(nf, { backgroundColor: 'rgba(5,5,10,0)', duration: 0.5 }, 3.05);
 }
 
 // Arriving from another page: the silk that covered the old page lifts off this one
