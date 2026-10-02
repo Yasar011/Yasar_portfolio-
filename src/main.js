@@ -24,7 +24,7 @@ let arriveKind = null;
 try { arrive = sessionStorage.getItem('pt'); arriveKind = sessionStorage.getItem('ptk'); sessionStorage.removeItem('pt'); sessionStorage.removeItem('ptk'); sessionStorage.removeItem('intro'); } catch (e) { /* storage blocked */ }
 const showIntro = !reduce && !arrive;
 const showArrive = !reduce && !!arrive;
-const D = showIntro ? 3.4 : showArrive ? (arriveKind ? 0.75 : 0.55) : 0; // delay hero entrance until the curtain lifts
+const D = showIntro ? 3.55 : showArrive ? (arriveKind ? 0.75 : 0.55) : 0; // delay hero entrance until the curtain lifts
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const pad = (n) => String(n).padStart(2, '0');
@@ -821,44 +821,48 @@ if (showIntro) {
   const nf = document.createElement('div');
   nf.className = 'nf';
   nf.setAttribute('aria-hidden', 'true');
-  nf.innerHTML = `<div class="nf-warp">${Array.from({ length: 44 }, () => '<i></i>').join('')}</div>
-    <div class="nf-weft">${Array.from({ length: 26 }, () => '<i></i>').join('')}</div>
+  nf.innerHTML = `<div class="nf-warp">${Array.from({ length: 30 }, () => '<i></i>').join('')}</div>
+    <div class="nf-weft">${Array.from({ length: 18 }, () => '<i></i>').join('')}</div>
     <div class="nf-word"><span class="nf-mark">y</span>${[...NAME].map((c) => (c === ' ' ? '<span class="nf-sp"></span>' : `<span class="nf-ch">${c}</span>`)).join('')}</div>
     <div class="nf-sub">Fashion · Technology · Photography</div>`;
   document.body.append(nf);
   lenis?.stop();
 
-  const word = $('.nf-word', nf), mark = $('.nf-mark', nf), chars = $$('.nf-ch', nf);
+  const word = $('.nf-word', nf), mark = $('.nf-mark', nf), chars = $$('.nf-ch', nf), sub = $('.nf-sub', nf);
   const warp = $$('.nf-warp i', nf), weft = $$('.nf-weft i', nf);
-  const paint = (el, i, dir) => {
-    const c = COLORS[i % COLORS.length], c2 = COLORS[(i * 5 + 2) % COLORS.length], th = 0.35 + Math.random() * 1.6;
+  const paint = (el, i, dir, n) => {
+    const c = COLORS[i % COLORS.length], c2 = COLORS[(i * 5 + 2) % COLORS.length], th = 0.5 + ((i * 37) % 10) / 6;
     el.style[dir === 'v' ? 'width' : 'height'] = `${th}${dir === 'v' ? 'vw' : 'vh'}`;
-    el.style[dir === 'v' ? 'left' : 'top'] = `${(i + 0.5) * (100 / (dir === 'v' ? warp.length : weft.length))}%`;
-    el.style.background = `linear-gradient(${dir === 'v' ? 180 : 90}deg, transparent, ${c} 15%, ${c2} 55%, ${c} 85%, transparent)`;
-    el.style.boxShadow = `0 0 ${14 + th * 10}px ${c}`;
+    el.style[dir === 'v' ? 'left' : 'top'] = `${(i + 0.5) * (100 / n)}%`;
+    el.style.background = `linear-gradient(${dir === 'v' ? 180 : 90}deg, transparent, ${c} 18%, ${c2} 50%, ${c} 82%, transparent)`;
   };
-  warp.forEach((el, i) => paint(el, i, 'v'));
-  weft.forEach((el, i) => paint(el, i, 'h'));
+  warp.forEach((el, i) => paint(el, i, 'v', warp.length));
+  weft.forEach((el, i) => paint(el, i, 'h', weft.length));
+  gsap.set([word, ...warp, ...weft], { force3D: true });
 
-  gsap.timeline({ onComplete: () => { nf.remove(); lenis?.start(); } })
-    // 1. Monogram, then the name rises out of the dark
-    .from(mark, { opacity: 0, scale: 0.4, rotate: -20, duration: 0.7, ease: 'back.out(2)' }, 0.1)
-    .from(chars, { opacity: 0, y: 40, filter: 'blur(14px)', duration: 0.7, ease: 'expo.out', stagger: 0.05 }, 0.35)
-    .from($('.nf-sub', nf), { opacity: 0, letterSpacing: '0.7em', duration: 0.9, ease: 'expo.out' }, 0.8)
-    // 2. A sweep of light across the name
-    .fromTo(word, { '--sx': '-30%' }, { '--sx': '130%', duration: 0.8, ease: 'power2.inOut' }, 1.05)
-    // 3. Everything but the monogram falls away; dive into the "y"
-    .to([...chars, $('.nf-sub', nf)], { opacity: 0, y: 20, filter: 'blur(8px)', duration: 0.4, ease: 'power2.in', stagger: 0.02 }, 1.7)
-    .set(word, { transformOrigin: () => { const r = mark.getBoundingClientRect(), w = word.getBoundingClientRect(); return `${r.left - w.left + r.width / 2}px ${r.top - w.top + r.height * 0.5}px`; } }, 1.75)
-    .to(word, { scale: 30, rotate: 8, duration: 1.0, ease: 'power3.in' }, 1.8)
-    .to(mark, { opacity: 0, duration: 0.2 }, 2.55)
-    // 4. Threads shoot out and weave a fabric
-    .fromTo(warp, { scaleY: 0, opacity: 0 }, { scaleY: 1, opacity: 1, duration: 0.7, ease: 'expo.out', stagger: { each: 0.008, from: 'center' } }, 2.4)
-    .fromTo(weft, { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 0.9, duration: 0.7, ease: 'expo.out', stagger: { each: 0.012, from: 'center' } }, 2.5)
-    // 5. The fabric pulls apart: warp threads fly up and down, weft threads fly sideways
-    .to(warp, { yPercent: (i) => (i % 2 ? -120 : 120), duration: 0.7, ease: 'power3.in', stagger: { each: 0.006, from: 'center' } }, 3.0)
-    .to(weft, { xPercent: (i) => (i % 2 ? -120 : 120), duration: 0.7, ease: 'power3.in', stagger: { each: 0.01, from: 'center' } }, 3.0)
-    .to(nf, { backgroundColor: 'rgba(5,5,10,0)', duration: 0.5 }, 3.05);
+  // Origin of the zoom: the centre of the "y"
+  const origin = () => { const r = mark.getBoundingClientRect(), w = word.getBoundingClientRect(); return `${r.left - w.left + r.width / 2}px ${r.top - w.top + r.height * 0.5}px`; };
+
+  gsap.timeline({ defaults: { ease: 'power2.out' }, onComplete: () => { nf.remove(); lenis?.start(); } })
+    // 1. Monogram and name glide in together
+    .fromTo(mark, { opacity: 0, scale: 0.6, rotate: -12 }, { opacity: 1, scale: 1, rotate: 0, duration: 1.1, ease: 'expo.out' }, 0)
+    .fromTo(chars, { opacity: 0, yPercent: 40 }, { opacity: 1, yPercent: 0, duration: 1.1, ease: 'expo.out', stagger: 0.045 }, 0.15)
+    .fromTo(sub, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 1, ease: 'expo.out' }, 0.55)
+    // 2. Gentle push-in with a light sweep
+    .fromTo(word, { scale: 1 }, { scale: 1.06, duration: 1.4, ease: 'sine.inOut' }, 0.4)
+    .fromTo(word, { '--sx': '-30%' }, { '--sx': '130%', duration: 1.0, ease: 'sine.inOut' }, 0.9)
+    // 3. Name and subtitle fade as the camera eases into the "y"
+    .to([...chars, sub], { opacity: 0, duration: 0.6, ease: 'sine.inOut', stagger: { each: 0.025, from: 'end' } }, 1.75)
+    .set(word, { transformOrigin: origin }, 1.8)
+    .to(word, { scale: 14, duration: 1.2, ease: 'expo.in' }, 1.85)
+    .to(mark, { opacity: 0, duration: 0.45, ease: 'sine.in' }, 2.6)
+    // 4. Threads grow out while the zoom finishes, weaving a fabric
+    .fromTo(warp, { scaleY: 0, opacity: 0 }, { scaleY: 1, opacity: 1, duration: 0.9, ease: 'expo.out', stagger: { each: 0.012, from: 'center' } }, 2.45)
+    .fromTo(weft, { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 0.85, duration: 0.9, ease: 'expo.out', stagger: { each: 0.018, from: 'center' } }, 2.55)
+    // 5. The fabric parts and fades onto the page
+    .to(warp, { yPercent: (i) => (i % 2 ? -110 : 110), duration: 0.9, ease: 'power2.inOut', stagger: { each: 0.008, from: 'center' } }, 3.15)
+    .to(weft, { xPercent: (i) => (i % 2 ? -110 : 110), duration: 0.9, ease: 'power2.inOut', stagger: { each: 0.012, from: 'center' } }, 3.15)
+    .to(nf, { backgroundColor: 'rgba(5,5,10,0)', duration: 0.25, ease: 'sine.in' }, 3.05);
 }
 
 // Arriving from another page: the silk that covered the old page lifts off this one

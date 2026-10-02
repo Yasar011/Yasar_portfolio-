@@ -898,10 +898,11 @@ section { position: relative; }
 /* ============ Intro: monogram, name, woven threads ============ */
 .nf { position: fixed; inset: 0; z-index: 170; background: #05050a; display: grid; place-items: center; overflow: hidden; pointer-events: none; }
 .nf-word { position: relative; z-index: 2; display: flex; align-items: baseline; font-family: var(--f-sans); font-weight: 700; font-size: clamp(3rem, 11vw, 10rem); letter-spacing: -0.05em; line-height: 1; --sx: -30%; will-change: transform; }
-.nf-mark { font-family: var(--f-serif); font-style: italic; font-weight: 400; font-size: 1.15em; margin-right: 0.18em; background: linear-gradient(135deg, #9b7bff, #ff4f8b); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 30px rgba(155, 123, 255, .6)); }
-.nf-ch { display: inline-block; color: transparent; background: linear-gradient(100deg, #e9e6ff 0%, #e9e6ff calc(var(--sx) - 12%), #fff calc(var(--sx) - 2%), #c9b8ff var(--sx), #e9e6ff calc(var(--sx) + 12%), #b9adff 100%); -webkit-background-clip: text; background-clip: text; filter: drop-shadow(0 0 22px rgba(108, 97, 255, .45)); }
+.nf-mark { font-family: var(--f-serif); font-style: italic; font-weight: 400; font-size: 1.15em; margin-right: 0.18em; background: linear-gradient(135deg, #9b7bff, #ff4f8b); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.nf-ch { display: inline-block; color: transparent; background: linear-gradient(100deg, #e9e6ff 0%, #e9e6ff calc(var(--sx) - 12%), #fff calc(var(--sx) - 2%), #c9b8ff var(--sx), #e9e6ff calc(var(--sx) + 12%), #b9adff 100%); -webkit-background-clip: text; background-clip: text; will-change: transform, opacity; }
 .nf-sp { width: 0.28em; }
 .nf-sub { position: absolute; z-index: 2; top: calc(50% + clamp(3rem, 11vw, 10rem) * 0.68); left: 0; right: 0; text-align: center; color: rgba(233,230,255,.7); font-size: clamp(11px, 1.1vw, 15px); letter-spacing: 0.32em; text-transform: uppercase; font-weight: 500; }
 .nf-warp, .nf-weft { position: absolute; inset: 0; z-index: 1; }
-.nf-warp i { position: absolute; top: -5%; height: 110%; margin-left: -0.4vw; opacity: 0; mix-blend-mode: screen; border-radius: 3px; }
-.nf-weft i { position: absolute; left: -5%; width: 110%; margin-top: -0.4vh; opacity: 0; mix-blend-mode: screen; border-radius: 3px; }
+.nf-warp i { position: absolute; top: -5%; height: 110%; margin-left: -0.4vw; opacity: 0; border-radius: 3px; will-change: transform, opacity; }
+.nf-weft i { position: absolute; left: -5%; width: 110%; margin-top: -0.4vh; opacity: 0; border-radius: 3px; will-change: transform, opacity; }
+.nf-word::before { content: ''; position: absolute; inset: -40% -20%; z-index: -1; background: radial-gradient(closest-side, rgba(108, 97, 255, .28), transparent); }
