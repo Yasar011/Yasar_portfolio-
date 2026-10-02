@@ -9,6 +9,8 @@ import {
 } from './data.js';
 import { mountAssistant } from './assistant.js';
 import { wiringSVG, statesHTML, initMonitor } from './monitor.js';
+import { demoHTML, initDemos, pcbSVG, initPCB, initProjectFx, initTilt, introParticles } from './fx.js';
+import { projectKind, cover as themedCover, reveal as themedReveal } from './transitions.js';
 
 gsap.registerPlugin(ScrollTrigger);
 const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -18,10 +20,11 @@ const page = document.body.dataset.page;
 
 // Every fresh load or refresh plays the stitched loader; moving between pages plays a short cut transition.
 let arrive = null;
-try { arrive = sessionStorage.getItem('pt'); sessionStorage.removeItem('pt'); sessionStorage.removeItem('intro'); } catch (e) { /* storage blocked */ }
+let arriveKind = null;
+try { arrive = sessionStorage.getItem('pt'); arriveKind = sessionStorage.getItem('ptk'); sessionStorage.removeItem('pt'); sessionStorage.removeItem('ptk'); sessionStorage.removeItem('intro'); } catch (e) { /* storage blocked */ }
 const showIntro = !reduce && !arrive;
 const showArrive = !reduce && !!arrive;
-const D = showIntro ? 2.8 : showArrive ? 0.55 : 0; // delay hero entrance until the curtain lifts
+const D = showIntro ? 3.1 : showArrive ? (arriveKind ? 0.75 : 0.55) : 0; // delay hero entrance until the curtain lifts
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const pad = (n) => String(n).padStart(2, '0');
@@ -165,7 +168,7 @@ function home() {
 
   <section class="sec on-white" style="padding-bottom:clamp(64px,8vw,110px)"><div class="wrap">
     <div class="head"><h2 class="t-1" data-reveal>Selected <span class="serif">work.</span></h2><a class="link" href="/work" data-reveal><span>All projects</span>${icon.arrow}</a></div>
-    <ol class="work-index">${projects.map((p, i) => `<li data-reveal><a class="work-row" href="/project?id=${p.id}" data-preview="${p.images[0]}" data-cursor="View">
+    <ol class="work-index">${projects.map((p, i) => `<li data-reveal><a class="work-row" href="/project?id=${p.id}" data-preview="${p.images[0]}" data-cursor="View"${p.accent ? ` style="--thread:${p.accent[0]}"` : ''}>
       <span class="wr-num mono">${pad(i + 1)}</span>
       <span class="wr-thumb">${media(p.images[0], { ratio: '16/10', alt: '' })}</span>
       <span class="wr-title">${p.title}</span>
@@ -204,7 +207,7 @@ function work() {
     <p class="lede" data-reveal>Systems built for a working apparel factory, a full event platform for TEDx, and machines that report on themselves.</p>
   </div></section>
   <section style="padding-bottom:clamp(96px,12vw,160px)"><div class="wrap"><div class="w-grid">
-    ${projects.map((p, i) => `<a class="w-card" href="/project?id=${p.id}" data-reveal data-cursor="View">
+    ${projects.map((p, i) => `<a class="w-card" href="/project?id=${p.id}" data-reveal data-cursor="View"${p.accent ? ` style="--thread:${p.accent[0]};--thread-2:${p.accent[1]}"` : ''}>
       ${media(p.images[0], { ratio: '4/3', alt: `${p.title} screen` })}
       <div class="w-info"><div><h2 class="t-2">${p.title}</h2><p class="dim">${p.role} · ${p.where}</p></div><span class="mono accent">${pad(i + 1)}</span></div>
       ${tags(p.stack.slice(0, 4))}
@@ -217,6 +220,7 @@ function project() {
   const id = new URLSearchParams(location.search).get('id');
   const i = Math.max(0, projects.findIndex((p) => p.id === id));
   const p = projects[i], next = projects[(i + 1) % projects.length];
+  if (p.accent) { const r = document.documentElement.style; r.setProperty('--thread', p.accent[0]); r.setProperty('--thread-2', p.accent[1]); r.setProperty('--thread-soft', p.accent[2]); }
   document.title = `${p.title} — Yasar C H`;
   return `
   <section class="p-hero"><div class="wrap">
@@ -240,12 +244,18 @@ function project() {
     <div data-reveal><h2 class="t-2">What I <span class="serif">built.</span></h2><p>${p.solution}</p></div>
   </div></section>
 
+  ${p.demo ? `<section class="sec-s demo-sec"><div class="wrap">
+    <div class="head"><div><h2 class="t-1" data-reveal>See it <span class="serif">in motion.</span></h2><p class="lede" data-reveal>${p.demoLede || ''}</p></div></div>
+    <div data-reveal>${demoHTML(p.demo)}</div>
+    <p class="demo-note dim" data-reveal>Animated illustration of the real flow, not live data.</p>
+  </div></section>` : ''}
+
   ${p.flow ? `<section class="sec-s flow-sec"><div class="wrap">
     <div class="head"><div><h2 class="t-1" data-reveal>How it <span class="serif">works.</span></h2><p class="lede" data-reveal>The system as one flow, from the factory floor to the dashboard.</p></div></div>
     <div class="flow" data-flow>${p.flow.map((st, i) => `<div class="flow-col${st.hub ? ' is-hub' : ''}${st.nodes.length > 1 ? ' is-fork' : ''}" data-reveal>
       <span class="flow-label mono"><b>${pad(i + 1)}</b> ${st.label}</span>
       ${st.nodes.map((n) => `<div class="flow-node"><h3>${n.t}</h3>${n.d ? `<p>${n.d}</p>` : ''}</div>`).join('')}
-    </div>${i < p.flow.length - 1 ? '<span class="flow-link" aria-hidden="true"><i></i></span>' : ''}`).join('')}</div>
+    </div>${i < p.flow.length - 1 ? '<span class="flow-link" aria-hidden="true"><i></i><b></b></span>' : ''}`).join('')}</div>
   </div></section>` : ''}
 
   ${p.wiring ? `<section class="on-night sec-s"><div class="wrap">
@@ -303,6 +313,17 @@ function project() {
   ${p.status ? `<section class="sec-s"><div class="wrap">
     <div class="head"><h2 class="t-1" data-reveal>Where it <span class="serif">stands.</span></h2></div>
     <div class="status">${p.status.map((st, k) => `<div class="status-col${k ? ' is-next' : ''}" data-reveal><span class="mono">${st.label}</span><ul>${st.items.map((x) => `<li>${x}</li>`).join('')}</ul></div>`).join('')}</div>
+    ${p.pcb ? `<div class="pcb-block">
+      <div class="pcb-text" data-reveal><span class="mono accent">Phase 2 · In progress · concept layout</span><h3 class="t-2">One compact <span class="serif">PCB.</span></h3>
+        <p>The breadboard works, but the vibration GarmentFix measures also shakes loose jumper wires. Phase 2 moves everything onto one board.</p>
+        <ul class="pcb-list">${p.pcb.map((x) => `<li>${x}</li>`).join('')}</ul></div>
+      <div class="pcb-wrap" data-reveal>${pcbSVG()}</div>
+    </div>` : ''}
+  </div></section>` : ''}
+
+  ${p.future ? `<section class="on-night sec-s"><div class="wrap">
+    <div class="head"><div><h2 class="t-1" data-reveal>What <span class="serif">next.</span></h2><p class="lede" data-reveal>Where the system goes after the PCB.</p></div></div>
+    <div class="future">${p.future.map(([t, d, n], k) => `<div class="fut" data-reveal><span class="mono">${String(k + 1).padStart(2, '0')}</span><h3>${t}</h3><p>${d}</p>${n ? `<b>${n}</b>` : ''}</div>`).join('')}</div>
   </div></section>` : ''}
 
   ${p.images.length > 1 ? `<section style="padding-bottom:clamp(48px,6vw,80px)">
@@ -515,7 +536,11 @@ mountAssistant({ lenis, reduce });
 if (page === 'project') {
   const cur = projects.find((x) => x.id === new URLSearchParams(location.search).get('id'));
   if (cur?.wiring || cur?.states) initMonitor({ reduce, states: cur.states });
+  initDemos(reduce);
+  initPCB(reduce);
+  initProjectFx(reduce, D);
 }
+initTilt();
 
 /* ---------- Nav + thread ---------- */
 const navEl = $('.nav'), sewn = $('.thread .sewn'), needle = $('.thread .needle'), threadEl = $('.thread');
@@ -800,14 +825,23 @@ if (showIntro) {
   const ld = veil(`<div class="dye">
       <svg class="dye-svg" viewBox="0 0 ${W} ${H}" aria-hidden="true">
         <defs><clipPath id="dye-clip"><path class="dye-wave" d="${wave}"/></clipPath>
-          <linearGradient id="dye-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a91ff"/><stop offset="1" stop-color="#3a2cf5"/></linearGradient></defs>
+          <linearGradient id="dye-grad" x1="0" y1="0" x2="1" y2="0" spreadMethod="repeat"><stop offset="0" stop-color="#6c61ff"/><stop offset=".33" stop-color="#b56cff"/><stop offset=".66" stop-color="#ff5fa2"/><stop offset="1" stop-color="#6c61ff"/></linearGradient>
+          <linearGradient id="dye-shine" gradientUnits="userSpaceOnUse" x1="-400" y1="0" x2="-100" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".95"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
         <text class="dye-outline" x="${W / 2}" y="${H * 0.78}" text-anchor="middle">${NAME}</text>
         <g clip-path="url(#dye-clip)"><text class="dye-fill" x="${W / 2}" y="${H * 0.78}" text-anchor="middle">${NAME}</text></g>
+        <text class="dye-shine" x="${W / 2}" y="${H * 0.78}" text-anchor="middle">${NAME}</text>
       </svg>
+      <div class="intro-stitch ld-stitch"><i></i><b></b></div>
       <div class="ld-meta"><span class="ld-status">Weaving</span><span class="ld-count">000</span></div>
       <p class="ld-name">Fashion Technology · NIFT Jodhpur <span>· Portfolio ${new Date().getFullYear()}</span></p>
     </div>`, true);
   lenis?.stop();
+  // Glowing orbs and rising dye particles behind the name
+  const fx = document.createElement('div');
+  fx.className = 'ld-fx';
+  fx.innerHTML = '<i class="orb o1"></i><i class="orb o2"></i><i class="orb o3"></i><canvas></canvas>';
+  ld.insertBefore(fx, $('.veil-in', ld));
+  const stopParticles = introParticles($('canvas', fx));
 
   const svg = $('.dye-svg', ld), waveEl = $('.dye-wave', ld), status = $('.ld-status', ld), count = $('.ld-count', ld);
   // Fit the viewBox to the real text once the face is ready, so the name always fills the width
@@ -832,7 +866,15 @@ if (showIntro) {
   };
   render();
 
-  lift(ld, 2.35)
+  const grad = $('#dye-grad', ld), shine = $('#dye-shine', ld);
+  gsap.to(grad, { attr: { x1: -1, x2: 0 }, duration: 1.6, ease: 'none', repeat: -1 });
+  lift(ld, 2.65)
+    .eventCallback('onComplete', () => { stopParticles(); ld.remove(); lenis?.start(); })
+    .to(fx, { opacity: 0, scale: 1.15, duration: 0.6, ease: 'power2.in' }, 2.6)
+    .fromTo($('.ld-stitch', ld), { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 1.9, ease: 'power1.inOut' }, 0.3)
+    .fromTo($('.ld-stitch b', ld), { left: '0%' }, { left: '100%', duration: 1.9, ease: 'power1.inOut' }, 0.3)
+    .fromTo(shine, { attr: { x1: -400, x2: -100 } }, { attr: { x1: 1300, x2: 1600 }, duration: 0.75, ease: 'power2.inOut' }, 2.0)
+    .fromTo($('.dye-svg', ld), { scale: 1 }, { scale: 1.04, duration: 0.35, yoyo: true, repeat: 1, ease: 'power2.out', transformOrigin: '50% 60%' }, 2.0)
     .from($('.dye', ld), { opacity: 0, y: 24, filter: 'blur(8px)', duration: 0.8, ease: 'expo.out' }, 0)
     .fromTo($('.dye-outline', ld), { strokeDasharray: '0 1200' }, { strokeDasharray: '1200 0', duration: 1.1, ease: 'power2.inOut' }, 0)
     .to(prog, { p: 1, duration: 1.95, ease: 'power1.inOut', onUpdate: render }, 0.3)
@@ -842,9 +884,9 @@ if (showIntro) {
 // Arriving from another page: the silk that covered the old page lifts off this one
 if (showArrive) {
   const safe = arrive.replace(/[<>&"]/g, '');
-  const el = veil(`<b class="pt-label">${flowLetters(safe)}</b>`, true);
   lenis?.stop();
-  lift(el, 0.05);
+  if (arriveKind && ['tedx', 'apms', 'qms', 'mon'].includes(arriveKind)) themedReveal(arriveKind, safe, () => lenis?.start());
+  else lift(veil(`<b class="pt-label">${flowLetters(safe)}</b>`, true), 0.05);
 }
 
 // Leaving: silk flows up over the page, the destination's name flows in, then we navigate
@@ -865,9 +907,11 @@ if (!reduce) {
     e.preventDefault();
     leaving = true;
     const label = routeLabel(url);
-    try { sessionStorage.setItem('pt', label); } catch (err) { location.href = url.href; return; }
+    const kind = url.pathname.replace(/\.html$/, '') === '/project' ? projectKind(url.searchParams.get('id')) : null;
+    try { sessionStorage.setItem('pt', label); if (kind) sessionStorage.setItem('ptk', kind); } catch (err) { location.href = url.href; return; }
     document.body.classList.remove('menu-open');
     lenis?.stop();
+    if (kind) { gsap.to('#main', { y: -30, opacity: 0.7, duration: 0.7, ease: 'power2.in' }); themedCover(kind, label, () => (location.href = url.href)); return; }
     const el = veil(`<b class="pt-label">${flowLetters(label)}</b>`, false);
     const [sa, sb] = $$('.silk path', el);
     gsap.timeline({ onComplete: () => (location.href = url.href) })
@@ -881,7 +925,7 @@ if (!reduce) {
   // Coming back via the browser's back button may restore the covered page from cache
   addEventListener('pageshow', (e) => {
     if (!e.persisted) return;
-    $$('.veil').forEach((v) => v.remove());
+    $$('.veil, .tr').forEach((v) => v.remove());
     gsap.set('#main', { clearProps: 'transform,opacity' });
     leaving = false;
     lenis?.start();
@@ -889,7 +933,7 @@ if (!reduce) {
 }
 
 // Arrival label letters settle in as the silk starts to lift
-if (showArrive) gsap.from('.veil .fl', { yPercent: 30, filter: 'blur(6px)', duration: 0.4, ease: 'expo.out', stagger: 0.015 });
+if (showArrive && !arriveKind) gsap.from('.veil .fl', { yPercent: 30, filter: 'blur(6px)', duration: 0.4, ease: 'expo.out', stagger: 0.015 });
 
 /* ---------- Wow: living name, thread trail, magnetic buttons ---------- */
 if (finePointer && !reduce) {
@@ -972,3 +1016,6 @@ if (finePointer && !reduce) {
 }
 
 addEventListener('load', () => ScrollTrigger.refresh());
+// Lazy images change the page height; re-measure scroll triggers once they settle
+let refreshT;
+document.addEventListener('load', (e) => { if (e.target.tagName === 'IMG') { clearTimeout(refreshT); refreshT = setTimeout(() => ScrollTrigger.refresh(), 200); } }, true);

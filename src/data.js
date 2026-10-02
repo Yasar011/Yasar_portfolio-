@@ -27,6 +27,9 @@ export const person = {
 export const projects = [
   {
     id: 'apms',
+    accent: ['#2563eb', '#60a5fa', '#e6efff'],
+    demo: 'apms',
+    demoLede: 'A machine breaks down: scan, alert, repair, back to running.',
     title: 'APMS',
     full: 'Automatic Problem Management System',
     role: 'System Designer & Full-Stack Developer',
@@ -71,6 +74,9 @@ export const projects = [
   },
   {
     id: 'garmentfix-qms',
+    accent: ['#7c3aed', '#a78bfa', '#f1eaff'],
+    demo: 'qms',
+    demoLede: 'Paper sheets disappear as live checks stream in from the line.',
     title: 'GarmentFix QMS',
     full: 'Real-Time Quality Management System',
     role: 'System Designer & Developer',
@@ -120,6 +126,17 @@ export const projects = [
   },
   {
     id: 'tedx-nift-jodhpur',
+    accent: ['#e62b1e', '#ff6a5e', '#fde9e7'],
+    demo: 'tedx',
+    demoLede: 'The hall fills up, an attendee picks a seat and gets a digital ticket.',
+    flow: [
+      { label: 'Visitors', nodes: [{ t: 'Public website', d: 'Event, speakers, venue and schedule.' }] },
+      { label: 'Join', nodes: [{ t: 'Volunteer application' }, { t: 'Interview status' }] },
+      { label: 'Data', hub: true, nodes: [{ t: 'Firebase', d: 'Applicants, departments, seats and tickets, live.' }] },
+      { label: 'Organise', nodes: [{ t: 'Department management' }, { t: 'Volunteer dashboard' }] },
+      { label: 'Attend', nodes: [{ t: 'Seat selection' }, { t: 'Digital ticket' }, { t: 'My Tickets' }] },
+      { label: 'Media', nodes: [{ t: 'Cloudinary', d: 'Images served fast to every phone.' }] },
+    ],
     title: 'TEDxNIFT Jodhpur',
     full: 'Website & Digital Platform',
     role: 'Website Designer & Developer',
@@ -146,6 +163,15 @@ export const projects = [
   },
   {
     id: 'smart-monitoring',
+    accent: ['#ea6a12', '#ff9b4d', '#fff0e4'],
+    pcb: ['One board with both MCU footprints (Node A + Node B)', 'A locking, keyed JST connector per sensor', 'Onboard 24 V → 5 V / 3.3 V regulation from the machine supply', 'Relay and CAN transceiver on board', 'Conformal coating and an enclosure'],
+    future: [
+      ['Fleet rollout', 'The same Node A / Node B pair on every machine, reporting into one central dashboard.', '≈ $8,000 for 200 machines'],
+      ['n8n automation', 'Daily shift data pushed to the factory ERP; an instant WhatsApp alert to the floor mechanic on a temperature spike.', ''],
+      ['On-device AI', 'A TinyML vibration classifier (Normal, Loose Belt, Hook Error) running on the ESP32, no internet needed.', ''],
+      ['Predictive failure', 'ARIMA / LSTM models on weeks of vibration data to predict the day a bearing will fail.', ''],
+      ['AI repair assistant', 'A chatbot that reads the machine manual and suggests repair steps in plain language.', ''],
+    ],
     title: 'GarmentFix Smart Monitoring',
     full: 'Smart Condition Monitoring for Industrial Sewing Machines',
     role: 'System Designer & Developer',
