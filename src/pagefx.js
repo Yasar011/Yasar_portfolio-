@@ -14,7 +14,7 @@ const mk = (cls, html) => {
 const label = (small, text) => `<div class="tr-label"><small class="mono">${small}</small><b>${letters(text)}</b></div>`;
 const labelIn = (d, at) => gsap.fromTo($$('.fl', d), { yPercent: 70, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.5, ease: 'expo.out', stagger: 0.025, delay: at });
 
-export const pageKind = (path) => ({ '/work': 'work', '/garments': 'garments', '/photography': 'photo', '/about': 'about', '/cv': 'cv' }[path] || null);
+export const pageKind = (path) => ({ '/work': 'work', '/garments': 'garments', '/photography': 'photo', '/about': 'about', '/cv': 'cv', '/contact': 'contact' }[path] || null);
 
 /* ---------------- Unique page transitions ---------------- */
 // Overlays live on <html> (not <body>) so the page itself can be moved in 3D underneath them.
@@ -209,6 +209,39 @@ const UNIQ = {
   },
 };
 
+// CONTACT: an envelope closes and is sealed with the "y" wax seal; on arrival the seal
+// cracks, the flap opens, and a paper plane flies out across the page.
+UNIQ.contact = {
+  build(text) {
+    return layer('tr-env', `<div class="env-body"></div><div class="env-flap"></div>
+      <div class="env-seal"><span>y</span></div>
+      <svg class="env-plane" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg>
+      <div class="tr-label"><small class="mono">SAY HELLO</small><b>${letters(text)}</b></div>`);
+  },
+  cover(text, done) {
+    const d = this.build(text);
+    gsap.timeline({ onComplete: done })
+      .fromTo($('.env-body', d), { yPercent: 100 }, { yPercent: 0, duration: 0.55, ease: 'power3.out' }, 0)
+      .fromTo($('.env-flap', d), { rotateX: 180, transformPerspective: 1400, transformOrigin: '50% 0%' }, { rotateX: 0, duration: 0.55, ease: 'power3.inOut' }, 0.3)
+      .fromTo($('.env-seal', d), { scale: 3, opacity: 0, rotate: -30 }, { scale: 1, opacity: 1, rotate: 0, duration: 0.4, ease: 'back.out(2.2)' }, 0.8)
+      .add(() => labelIn(d, 0), 0.9)
+      .to({}, { duration: 0.45 });
+  },
+  reveal(text, done) {
+    const d = this.build(text);
+    $$('.fl', d).forEach((x) => (x.style.opacity = 1));
+    const plane = $('.env-plane', d);
+    gsap.timeline({ onComplete: () => { d.remove(); done?.(); } })
+      .to($('.tr-label', d), { opacity: 0, duration: 0.25 }, 0.1)
+      .to($('.env-seal', d), { scale: 1.3, opacity: 0, rotate: 25, duration: 0.35, ease: 'power2.in' }, 0.25)
+      .to($('.env-flap', d), { rotateX: 180, transformPerspective: 1400, transformOrigin: '50% 0%', duration: 0.55, ease: 'power3.inOut' }, 0.4)
+      .fromTo(plane, { x: 0, y: 0, opacity: 0, scale: 0.6, rotate: 0 }, { opacity: 1, duration: 0.15 }, 0.75)
+      .to(plane, { x: innerWidth * 0.55, y: -innerHeight * 0.55, scale: 1.6, rotate: -15, duration: 0.8, ease: 'power2.in' }, 0.8)
+      .to($('.env-body', d), { yPercent: 105, duration: 0.6, ease: 'power3.in' }, 0.85)
+      .to($('.env-flap', d), { yPercent: -110, duration: 0.6, ease: 'power3.in' }, 0.85);
+  },
+};
+
 export function pageCover(kind, text, done) { UNIQ[kind].cover(text, done); }
 export function pageReveal(kind, text, done) { UNIQ[kind].reveal(text, done); }
 export const resetPageTransform = resetPage;
@@ -238,6 +271,13 @@ export function initPageFx(page, reduce) {
     });
     own($$('.cert')).forEach((c, i) => onView(c, { rotationY: 70, opacity: 0, transformPerspective: 900, transformOrigin: '0% 50%', duration: 1, ease: 'expo.out', delay: (i % 2) * 0.1 }));
     own($$('.lor')).forEach((l, i) => onView(l, { y: 80, rotate: i % 2 ? 3 : -3, opacity: 0, duration: 1.1, ease: 'expo.out' }));
+  }
+  if (page === 'contact') {
+    const t = $('.ct-title');
+    if (t) gsap.from(t, { letterSpacing: '0.2em', opacity: 0, duration: 1.2, ease: 'expo.out', delay: 0.2 });
+    own($$('.ct-card')).forEach((c, i) => gsap.from(c, { x: 80, rotate: 3, opacity: 0, duration: 1, ease: 'expo.out', delay: 0.35 + i * 0.1 }));
+    const fm = $('.ct-form');
+    if (fm) { own([fm]); gsap.from(fm, { y: 60, opacity: 0, duration: 1.1, ease: 'expo.out', delay: 0.3 }); gsap.from($$('.ct-reasons label', fm), { scale: 0.6, opacity: 0, duration: 0.5, ease: 'back.out(2.4)', stagger: 0.06, delay: 0.6 }); }
   }
   if (page === 'cv') {
     own($$('.tool')).forEach((t, i) => onView(t, { y: -40, opacity: 0, duration: 0.7, ease: 'bounce.out', delay: (i % 5) * 0.06 }, 'top 92%'));

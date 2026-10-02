@@ -1,7 +1,7 @@
 import { defineConfig, loadEnv } from 'vite';
 import { resolve } from 'node:path';
 
-const pages = ['index', 'work', 'project', 'garments', 'photography', 'about', 'cv'];
+const pages = ['index', 'work', 'project', 'garments', 'photography', 'about', 'cv', 'contact'];
 
 export default defineConfig(({ mode }) => {
   // Make server-only keys from .env.local (e.g. GROQ_API_KEY) visible to the dev API route

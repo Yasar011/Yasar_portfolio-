@@ -66,7 +66,7 @@ function wireMedia(root = document) {
 }
 
 /* ---------- Shared chrome ---------- */
-const links = [['Work', '/work'], ['Garments', '/garments'], ['Photography', '/photography'], ['About', '/about'], ['CV', '/cv']];
+const links = [['Work', '/work'], ['Garments', '/garments'], ['Photography', '/photography'], ['About', '/about'], ['CV', '/cv'], ['Contact', '/contact']];
 const here = (h) => {
   const p = location.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/';
   return p === h || (h === '/work' && page === 'project');
@@ -84,7 +84,7 @@ function chrome() {
   </div>`;
   const drawer = document.createElement('div');
   drawer.className = 'drawer'; drawer.id = 'drawer';
-  drawer.innerHTML = `<ol>${[['Home', '/'], ...links, ['Contact', '#contact']].map(([l, h]) => `<li><a href="${h}">${l}</a></li>`).join('')}</ol>
+  drawer.innerHTML = `<ol>${[['Home', '/'], ...links].map(([l, h]) => `<li><a href="${h}">${l}</a></li>`).join('')}</ol>
     <a class="btn" href="${person.cv}" download style="align-self:flex-start;margin-top:24px">${icon.download} Download CV</a>
     <div class="drawer-foot">${person.socials.map((s) => `<a href="${s.href}" target="_blank" rel="noopener">${s.label}</a>`).join('')}</div>`;
   const thread = document.createElement('div');
@@ -105,7 +105,8 @@ function chrome() {
 
   const foot = document.createElement('footer');
   foot.className = 'on-night contact'; foot.id = 'contact';
-  foot.innerHTML = `<div class="wrap">
+  if (page === 'contact') foot.classList.add('is-compact');
+  foot.innerHTML = page === 'contact' ? `<div class="wrap"><div class="foot-base"><span>© ${new Date().getFullYear()} Yasar C H · ${person.signoff}</span><a href="#top">Back to top ↑</a></div></div>` : `<div class="wrap">
     <h2 class="t-hero" data-reveal>Let's make<br>something <span class="serif">good.</span></h2>
     <p class="lede" data-reveal>Internships, collaborations, shoots or a factory floor that still runs on paper — I'd love to hear about it.</p>
     <div class="ctas" data-reveal><a class="btn" href="mailto:${person.email}">${icon.mail} ${person.email}</a><a class="link" href="${person.cv}" download><span>Download my CV</span>${icon.download}</a></div>
@@ -511,7 +512,55 @@ function cv() {
 }
 
 /* ---------- Render ---------- */
-const views = { home, work, project, garments: garmentsPage, photography, about, cv };
+function contact() {
+  const reasons = ['Internship', 'Collaboration', 'Photoshoot', 'Web project', 'Just saying hi'];
+  return `
+  <section class="page-hero ct-hero"><div class="wrap">
+    ${crumbs('Contact')}
+    <h1 class="t-hero ct-title" data-reveal>Let's <span class="serif">talk.</span></h1>
+    <p class="lede" data-reveal>Internships, collaborations, shoots, or a factory floor that still runs on paper. Write to me and I'll get back to you.</p>
+  </div></section>
+
+  <section style="padding-bottom:clamp(80px,10vw,140px)"><div class="wrap ct-grid">
+    <form class="ct-form" data-reveal novalidate>
+      <fieldset class="ct-reasons"><legend>What's it about?</legend>
+        ${reasons.map((r, i) => `<label><input type="radio" name="reason" value="${r}"${i === 0 ? ' checked' : ''}><span>${r}</span></label>`).join('')}
+      </fieldset>
+      <div class="ct-row">
+        <label class="ct-field"><span>Your name</span><input name="name" autocomplete="name" required placeholder="Full name"></label>
+        <label class="ct-field"><span>Your email</span><input name="email" type="email" autocomplete="email" required placeholder="you@example.com"></label>
+      </div>
+      <label class="ct-field"><span>Message</span><textarea name="message" rows="6" required placeholder="Tell me a little about it…"></textarea></label>
+      <div class="ct-actions">
+        <button class="btn ct-send" type="submit"><span class="ct-plane">${sv('<path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/>')}</span><span>Send message</span></button>
+        <p class="ct-note dim">Opens your email app with the message ready to send.</p>
+      </div>
+      <p class="ct-error" role="alert" hidden></p>
+    </form>
+
+    <aside class="ct-side">
+      <div class="ct-card ct-mail" data-reveal>
+        <span class="mono dim">Email</span>
+        <a class="ct-email" href="mailto:${person.email}">${person.email}</a>
+        <button class="btn btn--line ct-copy" type="button">${sv('<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>', 1.7)}<span>Copy email</span></button>
+      </div>
+      <div class="ct-card" data-reveal>
+        <span class="mono dim">Elsewhere</span>
+        <div class="ct-socials">${person.socials.map((s) => `<a href="${s.href}" target="_blank" rel="noopener"><i>${socialIcon[s.label]}</i><span><b>${s.label}</b><span>@${s.handle}</span></span>${icon.out}</a>`).join('')}</div>
+      </div>
+      <div class="ct-card ct-dual" data-reveal>
+        <div><span class="mono dim">Based in</span><b>NIFT Jodhpur</b><span class="dim">from Perinthalmanna, Kerala</span></div>
+        <div><span class="mono dim">Currently</span><b>BFT-7</b><span class="dim">${person.degree}</span></div>
+      </div>
+      <div class="ct-card ct-quick" data-reveal>
+        <a class="btn" href="${person.cv}" download>${icon.download} Download CV</a>
+        <button class="btn btn--line ct-ask" type="button">Ask my AI assistant</button>
+      </div>
+    </aside>
+  </div></section>`;
+}
+
+const views = { home, work, project, garments: garmentsPage, photography, about, cv, contact };
 $('#main').innerHTML = views[page]?.() ?? '';
 let lenis = null;
 chrome();
@@ -652,6 +701,42 @@ if ($('.g-shot') && $('.lightbox')) {
     if (e.key === 'ArrowRight') show(idx + 1);
     if (e.key === 'ArrowLeft') show(idx - 1);
   });
+}
+
+/* ---------- Contact form ---------- */
+if (page === 'contact') {
+  const form = $('.ct-form'), err = $('.ct-error'), send = $('.ct-send');
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const f = new FormData(form);
+    const name = (f.get('name') || '').trim(), email = (f.get('email') || '').trim(), msg = (f.get('message') || '').trim(), reason = f.get('reason');
+    const bad = !name ? 'name' : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? 'email' : !msg ? 'message' : null;
+    $$('.ct-field', form).forEach((l) => l.classList.toggle('is-bad', !!bad && l.querySelector(`[name="${bad}"]`)));
+    if (bad) {
+      err.hidden = false;
+      err.textContent = bad === 'email' ? 'Please enter a valid email so I can reply.' : `Please add your ${bad}.`;
+      form.querySelector(`[name="${bad}"]`).focus();
+      gsap.fromTo(form.querySelector(`[name="${bad}"]`).closest('.ct-field'), { x: -8 }, { x: 0, duration: 0.5, ease: 'elastic.out(1, 0.3)' });
+      return;
+    }
+    err.hidden = true;
+    const subject = `${reason} — from ${name}`;
+    const body = `${msg}\n\n— ${name}\n${email}`;
+    const go = () => { location.href = `mailto:${person.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; };
+    if (reduce) return go();
+    // the paper plane takes off
+    const plane = $('.ct-plane', send);
+    gsap.timeline({ onComplete: () => { go(); gsap.set(plane, { clearProps: 'all' }); send.classList.add('is-sent'); $('span:last-child', send).textContent = 'Opened in your email app'; } })
+      .to(plane, { x: 40, y: -30, rotate: -20, duration: 0.25, ease: 'power2.in' })
+      .to(plane, { x: innerWidth, y: -innerHeight * 0.6, rotate: -35, scale: 2.2, opacity: 0, duration: 0.6, ease: 'power3.in' });
+  });
+  $('.ct-copy').addEventListener('click', async (e) => {
+    const b = e.currentTarget, s = $('span', b);
+    try { await navigator.clipboard.writeText(person.email); s.textContent = 'Copied!'; } catch { s.textContent = 'Press Ctrl+C'; getSelection().selectAllChildren($('.ct-email')); }
+    b.classList.add('is-done');
+    setTimeout(() => { s.textContent = 'Copy email'; b.classList.remove('is-done'); }, 1800);
+  });
+  $('.ct-ask').addEventListener('click', () => $('.ask-fab')?.click());
 }
 
 /* ---------- Motion ---------- */
@@ -872,7 +957,7 @@ if (showArrive) {
   const safe = arrive.replace(/[<>&"]/g, '');
   lenis?.stop();
   if (arriveKind && ['tedx', 'apms', 'qms', 'mon'].includes(arriveKind)) themedReveal(arriveKind, safe, () => lenis?.start());
-  else if (arriveKind && ['work', 'garments', 'photo', 'about', 'cv'].includes(arriveKind)) pageReveal(arriveKind, safe, () => lenis?.start());
+  else if (arriveKind && ['work', 'garments', 'photo', 'about', 'cv', 'contact'].includes(arriveKind)) pageReveal(arriveKind, safe, () => lenis?.start());
   else lift(veil(`<b class="pt-label">${flowLetters(safe)}</b>`, true), 0.05);
 }
 
@@ -880,7 +965,7 @@ if (showArrive) {
 const routeLabel = (url) => {
   const path = url.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/';
   if (path === '/project') return projects.find((p) => p.id === url.searchParams.get('id'))?.title || 'Project';
-  return { '/': 'Home', '/work': 'Work', '/garments': 'Garments', '/photography': 'Photography', '/about': 'About', '/cv': 'CV' }[path] || 'Yasar C H';
+  return { '/': 'Home', '/work': 'Work', '/garments': 'Garments', '/photography': 'Photography', '/about': 'About', '/cv': 'CV', '/contact': 'Contact' }[path] || 'Yasar C H';
 };
 let leaving = false;
 if (!reduce) {
