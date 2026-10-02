@@ -906,3 +906,28 @@ section { position: relative; }
 .nf-warp i { position: absolute; top: -5%; height: 110%; margin-left: -0.4vw; opacity: 0; border-radius: 3px; will-change: transform, opacity; }
 .nf-weft i { position: absolute; left: -5%; width: 110%; margin-top: -0.4vh; opacity: 0; border-radius: 3px; will-change: transform, opacity; }
 .nf-word::before { content: ''; position: absolute; inset: -40% -20%; z-index: -1; background: radial-gradient(closest-side, rgba(108, 97, 255, .28), transparent); }
+
+/* ============ Page transitions: Work, Garments, Photography, About, CV ============ */
+.tr-panels { display: grid; }
+.tr-panels i { position: absolute; top: 0; bottom: 0; width: calc(100% / 6 + 1px); left: calc(var(--i) * 100% / 6); background: hsl(calc(244 + var(--i) * 4) 70% calc(14% + var(--i) * 3%)); }
+.tr-panels small { color: #a99dff; }
+.tr-drape .dr-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.tr-drape small { color: #f3d9ea; }
+.tr-shutter .sh-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.tr-shutter .sh-flash { position: absolute; inset: 0; background: #fff; opacity: 0; z-index: 2; }
+.tr-shutter small { color: #ffd166; }
+.tr-blinds { display: block; }
+.tr-blinds i { display: block; position: relative; left: 0; width: 100%; margin: 0; height: calc(100% / 9 + 1px); background: linear-gradient(90deg, #0b0b10, #16161d); border-bottom: 1px solid rgba(108,97,255,.25); }
+.tr-blinds i.r { background: linear-gradient(270deg, #0b0b10, #1b1830); }
+.tr-blinds .tr-label { position: absolute; inset: 0; display: grid; place-content: center; }
+.tr-blinds small { color: #a99dff; }
+.tr-paper .pp-bg { position: absolute; inset: 0; background: radial-gradient(80% 80% at 50% 40%, #1d1d26, #0b0b10); }
+.tr-paper .pp-sheet { position: absolute; width: min(68vw, 460px); aspect-ratio: 1 / 1.414; background: #fbfbf8; border-radius: 6px; padding: 7% 8%; box-shadow: 0 40px 80px -20px rgba(0,0,0,.7); display: flex; flex-direction: column; gap: 4.2%; }
+.tr-paper .pp-head { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #0d0d12; padding-bottom: 4%; margin-bottom: 2%; color: #0d0d12; }
+.tr-paper .pp-head b { font-size: clamp(18px, 3vw, 28px); letter-spacing: -0.03em; }
+.tr-paper .pp-head span { font-size: 12px; color: #6b6b78; }
+.tr-paper .pp-sheet i { display: block; height: 7px; border-radius: 4px; background: #d9d9e3; transform-origin: left; }
+.tr-paper .pp-sheet i:nth-child(4n+2) { background: #c9c2ff; }
+.tr-paper .tr-label { position: absolute; bottom: 8vh; left: 0; right: 0; }
+.tr-paper .tr-label > b { font-size: clamp(2rem, 5vw, 4rem); }
+.tr-paper small { color: #a99dff; }

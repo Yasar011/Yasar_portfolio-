@@ -11,6 +11,7 @@ import { mountAssistant } from './assistant.js';
 import { wiringSVG, statesHTML, initMonitor } from './monitor.js';
 import { demoHTML, initDemos, pcbSVG, initPCB, initProjectFx, initTilt } from './fx.js';
 import { projectKind, cover as themedCover, reveal as themedReveal } from './transitions.js';
+import { pageKind, pageCover, pageReveal, initPageFx } from './pagefx.js';
 
 gsap.registerPlugin(ScrollTrigger);
 const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -656,6 +657,7 @@ if ($('.g-shot') && $('.lightbox')) {
 /* ---------- Motion ---------- */
 if (!reduce) {
   // Hero entrance, staggered
+  initPageFx(page, reduce);
   const heroBits = $$('.me [data-reveal], .page-hero [data-reveal], .p-hero [data-reveal]');
   gsap.to(heroBits, { opacity: 1, y: 0, duration: 1.2, ease: 'expo.out', stagger: 0.09, delay: 0.1 + D });
 
@@ -870,6 +872,7 @@ if (showArrive) {
   const safe = arrive.replace(/[<>&"]/g, '');
   lenis?.stop();
   if (arriveKind && ['tedx', 'apms', 'qms', 'mon'].includes(arriveKind)) themedReveal(arriveKind, safe, () => lenis?.start());
+  else if (arriveKind && ['work', 'garments', 'photo', 'about', 'cv'].includes(arriveKind)) pageReveal(arriveKind, safe, () => lenis?.start());
   else lift(veil(`<b class="pt-label">${flowLetters(safe)}</b>`, true), 0.05);
 }
 
@@ -891,11 +894,12 @@ if (!reduce) {
     e.preventDefault();
     leaving = true;
     const label = routeLabel(url);
-    const kind = url.pathname.replace(/\.html$/, '') === '/project' ? projectKind(url.searchParams.get('id')) : null;
+    const dest = url.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/';
+    const kind = dest === '/project' ? projectKind(url.searchParams.get('id')) : pageKind(dest);
     try { sessionStorage.setItem('pt', label); if (kind) sessionStorage.setItem('ptk', kind); } catch (err) { location.href = url.href; return; }
     document.body.classList.remove('menu-open');
     lenis?.stop();
-    if (kind) { gsap.to('#main', { y: -30, opacity: 0.7, duration: 0.7, ease: 'power2.in' }); themedCover(kind, label, () => (location.href = url.href)); return; }
+    if (kind) { gsap.to('#main', { y: -30, opacity: 0.7, duration: 0.7, ease: 'power2.in' }); (projectKind(url.searchParams.get('id')) === kind && dest === '/project' ? themedCover : pageCover)(kind, label, () => (location.href = url.href)); return; }
     const el = veil(`<b class="pt-label">${flowLetters(label)}</b>`, false);
     const [sa, sb] = $$('.silk path', el);
     gsap.timeline({ onComplete: () => (location.href = url.href) })
