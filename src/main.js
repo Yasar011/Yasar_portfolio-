@@ -12,6 +12,8 @@ import { wiringSVG, statesHTML, initMonitor } from './monitor.js';
 import { demoHTML, initDemos, pcbSVG, initPCB, initProjectFx, initTilt } from './fx.js';
 import { projectKind, cover as themedCover, reveal as themedReveal } from './transitions.js';
 import { pageKind, pageCover, pageReveal, initPageFx, resetPageTransform } from './pagefx.js';
+import { playgroundHTML, initPlayground } from './automate.js';
+import { mini } from './mini.js';
 
 gsap.registerPlugin(ScrollTrigger);
 const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -117,11 +119,12 @@ function chrome() {
 }
 
 /* ---------- Building blocks ---------- */
+const pinIcon = sv('<path d="M12 17v5M8 3h8l-1 6 3 3v2H6v-2l3-3z"/>', 1.7);
 const crumbs = (...parts) => `<nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a>${parts.map((p) => `${icon.chev}${Array.isArray(p) ? `<a href="${p[1]}">${p[0]}</a>` : `<span>${p}</span>`}`).join('')}</nav>`;
 const tags = (list) => `<ul class="tags">${list.map((t) => `<li class="tag">${t}</li>`).join('')}</ul>`;
 
 /* ---------- Pages ---------- */
-const roles = ['developer', 'photographer', 'garment maker', 'system designer', 'club president'];
+const roles = ['automation builder', 'developer', 'photographer', 'garment maker', 'system designer'];
 const ticker = ['Web Development', 'Fashion Technology', 'UI/UX Design', 'Photography', 'Garment Development', 'Video Editing', 'Quality Systems', 'Creative Direction'];
 const services = [
   { t: 'Digital systems', d: 'Web apps and real-time platforms that people on a factory floor or at an event actually use.', items: ['Web Development', 'Firebase', 'PWA', 'UI/UX', 'AI-assisted dev', 'n8n'] },
@@ -166,6 +169,23 @@ function home() {
       <p class="lede" data-reveal style="max-width:58ch">${person.about}</p>
       <div class="ctas" style="margin-top:32px" data-reveal><a class="link" href="/about"><span>More about me</span>${icon.arrow}</a><a class="link" href="/cv"><span>Read my CV</span>${icon.arrow}</a></div>
     </div>
+  </div></section>
+
+  <section class="sec auto-sec"><div class="wrap">
+    <div class="auto-head">
+      <div><span class="pin-chip" data-reveal>${pinIcon} Pinned skill</span>
+        <h2 class="t-1" data-reveal>I <span class="serif">automate</span> things.</h2>
+        <p class="lede" data-reveal>Through IoT that senses and acts, and AI that reads the data and suggests what to do, so people stop re-typing, walking and waiting.</p></div>
+    </div>
+    <div class="auto-pillars">
+      ${[
+        ['IoT', 'Sense & act', 'Sensors on real sewing machines. When a motor overheats, the relay cuts power by itself.', 'Smart Monitoring', '/project?id=smart-monitoring', 'iot'],
+        ['AI', 'Understand & suggest', 'An AI bot that explains defect trends, plus the assistant on this site that answers questions about me.', 'GarmentFix QMS', '/project?id=garmentfix-qms', 'ai'],
+        ['Software', 'Route & report', 'A QR scan becomes a ticket that reaches the right engineer in seconds; reports build themselves.', 'APMS', '/project?id=apms', 'sw'],
+      ].map(([k, sub, d, proj, href, c]) => `<a class="pillar pillar-${c}" href="${href}" data-reveal><span class="pillar-k">${k}</span><b>${sub}</b><p>${d}</p><span class="link"><span>${proj}</span>${icon.arrow}</span></a>`).join('')}
+    </div>
+    <div class="pg-head"><h3 class="t-2" data-reveal>Try it <span class="serif">yourself.</span></h3><p class="dim" data-reveal>Push the sliders, press the e-stop, or hit Chaos mode, and watch the automation react.</p></div>
+    <div data-reveal>${playgroundHTML()}</div>
   </div></section>
 
   <section class="sec on-white" style="padding-bottom:clamp(64px,8vw,110px)"><div class="wrap">
@@ -396,7 +416,7 @@ const experienceList = () => `<ol class="timeline">${experience.map((x) => `<li 
 const educationList = () => `<ol class="timeline">${education.map((e) => `<li data-reveal><div>${e.years ? `<span class="when">${e.years}</span>` : ''}<h3>${e.place}</h3></div>
       <div><p style="margin:0">${e.what}</p>${e.now ? `<p class="dim" style="margin:6px 0 0">${e.now}</p>` : ''}</div></li>`).join('')}</ol>`;
 const certList = () => `<div class="cert-grid">${certificates.map((c) => `<div class="cert" data-reveal><span class="ico">${icon.award}</span><div><h3>${c.title}</h3><p>${c.detail}</p></div></div>`).join('')}</div>`;
-const skillList = () => `<div class="skills">${skills.map((s) => `<div class="skill-row" data-reveal><h3>${s.group}</h3>${tags(s.items)}</div>`).join('')}</div>`;
+const skillList = () => `<div class="skills">${skills.map((s) => `<div class="skill-row${s.pinned ? ' is-pinned' : ''}" data-reveal><h3>${s.pinned ? `<span class="pin-chip">${pinIcon} Pinned</span>` : ''}${s.group}</h3>${tags(s.items)}</div>`).join('')}</div>`;
 
 function about() {
   return `
@@ -517,6 +537,7 @@ function contact() {
   return `
   <section class="page-hero ct-hero"><div class="wrap">
     ${crumbs('Contact')}
+    <div class="ct-buddy" aria-hidden="true"><div class="ct-bubble"><span>Hi! Drop me a line.</span></div><div class="ct-face">${mini({ wave: true, crop: false })}</div></div>
     <h1 class="t-hero ct-title" data-reveal>Let's <span class="serif">talk.</span></h1>
     <p class="lede" data-reveal>Internships, collaborations, shoots, or a factory floor that still runs on paper. Write to me and I'll get back to you.</p>
   </div></section>
@@ -591,6 +612,7 @@ if (page === 'project') {
   initProjectFx(reduce, D);
 }
 initTilt();
+initPlayground(reduce);
 
 /* ---------- Nav + thread ---------- */
 const navEl = $('.nav'), sewn = $('.thread .sewn'), needle = $('.thread .needle'), threadEl = $('.thread');
@@ -705,6 +727,30 @@ if ($('.g-shot') && $('.lightbox')) {
 
 /* ---------- Contact form ---------- */
 if (page === 'contact') {
+  // Mini-me reacts to what the visitor is doing
+  const buddy = $('.ct-buddy'), bubble = $('.ct-bubble span');
+  const talk = (txt, mood) => {
+    if (bubble.textContent === txt) return;
+    bubble.textContent = txt;
+    buddy.dataset.mood = mood || '';
+    if (!reduce) gsap.fromTo('.ct-bubble', { scale: 0.85, opacity: 0.4 }, { scale: 1, opacity: 1, duration: 0.35, ease: 'back.out(2.5)' });
+  };
+  const lines = { name: ['Nice to meet you!', 'happy'], email: ['So I can reply to you.', ''], message: ['Take your time, I read everything.', 'think'] };
+  $$('.ct-form input[name], .ct-form textarea').forEach((f) => {
+    f.addEventListener('focus', () => talk(...(lines[f.name] || ['', ''])));
+    f.addEventListener('input', () => { if (f.name === 'message' && f.value.length > 120) talk('Ooh, a long one. I like it.', 'happy'); });
+  });
+  $$('.ct-reasons input').forEach((r) => r.addEventListener('change', () => talk({ Internship: 'An internship? Yes please!', Collaboration: 'Let’s build something together.', Photoshoot: 'Camera is charged and ready.', 'Web project': 'I’ll bring the code.', 'Just saying hi': 'Hi back!' }[r.value], 'happy')));
+  if (!reduce && matchMedia('(hover: hover)').matches) {
+    addEventListener('pointermove', (e) => {
+      const r = $('.ct-face').getBoundingClientRect(), dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2), d = Math.hypot(dx, dy) || 1, k = Math.min(1, d / 300);
+      buddy.style.setProperty('--lx', `${((dx / d) * 1.8 * k).toFixed(2)}px`); buddy.style.setProperty('--ly', `${((dy / d) * 1.5 * k).toFixed(2)}px`);
+    }, { passive: true });
+    buddy.classList.add('is-waving');
+    $('.ct-face').addEventListener('click', () => { buddy.classList.remove('is-waving'); void buddy.offsetWidth; buddy.classList.add('is-waving'); talk('Hey, that tickles!', 'happy'); gsap.fromTo('.ct-face', { y: 0 }, { y: -18, duration: 0.25, yoyo: true, repeat: 1, ease: 'power2.out' }); });
+  }
+  window.__ctTalk = talk;
+
   const form = $('.ct-form'), err = $('.ct-error'), send = $('.ct-send');
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -717,12 +763,15 @@ if (page === 'contact') {
       err.textContent = bad === 'email' ? 'Please enter a valid email so I can reply.' : `Please add your ${bad}.`;
       form.querySelector(`[name="${bad}"]`).focus();
       gsap.fromTo(form.querySelector(`[name="${bad}"]`).closest('.ct-field'), { x: -8 }, { x: 0, duration: 0.5, ease: 'elastic.out(1, 0.3)' });
+      window.__ctTalk?.('Oops, something’s missing.', 'sad');
       return;
     }
     err.hidden = true;
     const subject = `${reason} — from ${name}`;
     const body = `${msg}\n\n— ${name}\n${email}`;
     const go = () => { location.href = `mailto:${person.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; };
+    window.__ctTalk?.('Yay! Your email app is opening.', 'happy');
+    if (!reduce) gsap.fromTo('.ct-face', { y: 0, rotate: 0 }, { y: -30, rotate: 360, duration: 0.7, ease: 'power2.out', transformOrigin: '50% 60%', onComplete: () => gsap.to('.ct-face', { y: 0, duration: 0.4, ease: 'bounce.out' }) });
     if (reduce) return go();
     // the paper plane takes off
     const plane = $('.ct-plane', send);

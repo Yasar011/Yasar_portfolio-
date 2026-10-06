@@ -12,6 +12,7 @@ export const person = {
   about:
     'I am a Bachelor of Fashion Technology student at NIFT Jodhpur, interested in combining fashion, technology, digital development and visual storytelling. I enjoy building digital systems, exploring AI-assisted development, working with technology in manufacturing, creating visual content, and managing creative projects and events.',
   signoff: 'Building at the intersection of Fashion, Technology & Visual Storytelling.',
+  pinned: 'Automation, through IoT and AI',
   email: 'chyasar2004@gmail.com',
   location: 'Perinthalmanna, Kerala · NIFT Jodhpur',
   cv: '/Yasar_CH_CV.pdf',
@@ -387,6 +388,7 @@ export const recommendations = [
 ];
 
 export const skills = [
+  { group: 'Automation · IoT + AI', pinned: true, items: ['Process Automation', 'Industrial IoT', 'Arduino & ESP32', 'Sensors & CAN bus', 'AI-assisted analysis', 'n8n workflows', 'Firebase real-time triggers'] },
   { group: 'Digital & Technology', items: ['HTML', 'CSS', 'JavaScript', 'Firebase', 'Vercel', 'Cloudinary', 'GitHub', 'Web Development', 'AI Tools', 'Vibe Coding', 'n8n'] },
   { group: 'Fashion Tech & Manufacturing', items: ['TukaTech', 'TukaCard', 'FastReact', 'TimeSSD', 'Digital Quality Systems', 'Industrial IoT', 'Process Automation'] },
   { group: 'Creative & Design', items: ['Canva', 'Photoshop', 'Illustrator', 'Lightroom', 'Premiere Pro', 'After Effects', 'Blender', 'Excel', 'PowerPoint'] },
