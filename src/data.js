@@ -42,6 +42,28 @@ export const projects = [
       'When a sewing machine stops, every minute counts. Breakdowns, maintenance calls and style changeovers were reported by walking, shouting and paper — slow to reach the right engineer and impossible to analyse later.',
     solution:
       'Operators scan a QR code on the machine and raise the problem in seconds. The right engineering department is pushed a notification instantly, and every event is timestamped from call to fix.',
+    // Case study: audience, research, ideation
+    audience: [
+      ['Machine operators', 'Raise a stoppage in one scan, standing at the machine, with no login.'],
+      ['Technicians', 'Mechanical, Technical, IE and Quality each get only their own jobs, pushed to the phone.'],
+      ['Stores', 'Approve and issue spare parts against a live ticket.'],
+      ['Admin & factory manager', 'Open tickets, technicians online, PM due and repair history in one view.'],
+    ],
+    research: [
+      ['Stoppages were reported on foot', 'Breakdowns, maintenance calls and style changeovers travelled by walking, shouting and paper.'],
+      ['Nothing was timestamped', 'No record of when a call was raised or fixed, so downtime could not be analysed later.'],
+      ['The floor is big', '1,486 machines across 32 production modules, 4 sections and 4 engineering departments.'],
+      ['Breakdowns are not the only stop', 'Style changeovers also stop machines, so they had to be tracked alongside breakdowns.'],
+      ['Not every mechanic fits every machine', 'Skill differs by machine type, which became the mechanic skill matrix.'],
+    ],
+    sketch: [['Machine stops'], ['Scan QR', 'no login'], ['Ticket', 'priority + type'], ['Route', '4 departments', 1], ['Fix', 'timer runs'], ['Closed', 'timed + logged']],
+    options: [
+      ['Operators log in to report a problem', 'Scan the machine’s QR code, no login', 'At a stopped machine every second counts, and the QR already says which machine it is.'],
+      ['One shared queue for every engineer', 'Auto-route each ticket to its department', 'Mechanical, Technical, IE and Quality only see and accept their own work.'],
+      ['A native app to install on each phone', 'An installable PWA', 'Runs on the phones already on the floor, updates instantly, nothing to roll out.'],
+      ['Fix machines only after they fail', 'A preventive maintenance scheduler', 'Service tickets are raised from the last service date, before a breakdown.'],
+    ],
+    process: ['Map how stoppages were reported', 'Give every machine a QR identity', 'Operator and technician flows', 'Routing, timers and spare parts', 'PM scheduler and skill matrix', 'Linked with QMS defects'],
     stack: ['React', 'Tailwind CSS', 'Firebase Realtime Database', 'Firebase Cloud Messaging', 'PWA', 'QR Code', 'JavaScript'],
     scale: [
       { value: '1,486', label: 'machines on the system' },
@@ -89,6 +111,37 @@ export const projects = [
       'Quality checks lived on paper. Each shift produced stacks of inspection sheets that someone re-typed for hours, and management saw the numbers six hours late.',
     solution:
       'Inspectors log end-line, roving and third-party checks directly on a device. Defects flow into live analytics, repeat offenders are flagged automatically, and reports are ready the moment the data lands.',
+    audience: [
+      ['End-line & roving QC', 'Log every check on a phone at the machine, with no retraining.'],
+      ['QC head & managers', 'See defect rates and risky operators live, not six hours later.'],
+      ['Third-party auditors', 'Their audit stage captured in the same system.'],
+      ['Admin', 'Set styles, operations, the defect library, line rosters and rotation.'],
+    ],
+    research: [
+      ['70–80 paper sheets a shift', 'End Line, Roving and 3rd Party audits each had their own paper form.'],
+      ['Half a shift re-keying', 'One designated QC spent half a shift typing sheets in, time meant for inspecting.'],
+      ['A six-hour lag', 'Totals were calculated by hand and reached the Power BI dashboard about six hours late.'],
+      ['Every form studied field by field', 'The digital version keeps the factory’s own vocabulary and layout, so QC staff needed no retraining.'],
+      ['Factory rules, enforced', 'A defect needs a CPA; visit N+1 cannot start while visit N is missing its action.'],
+    ],
+    researchNote: 'Guided by Ms. Bhavani K (HR) and Mr. Vignesh (QC HOD) at Brandix Unit 3.',
+    sketch: [['Paper sheet', 'the old way'], ['Scan machine QR'], ['Enter check once', 'at the source'], ['Live database', 'Firebase', 1], ['Dashboard', '+ reports'], ['AI insight', 'explains trends']],
+    options: [
+      ['Installing an app or buying scanners', 'One web page that opens in any Android browser', 'No install, no app store, no new hardware: it runs on the phones already on the floor.'],
+      ['Flag operators by defect volume', 'Flag by recurrence across visits', 'Five of one defect in a single visit is usually a machine or a bad bundle; the same defect on visits 1 and 3 points to a person who needs coaching.'],
+      ['Rank operators from any sample', 'A minimum of 20 pieces before ranking', 'Nobody appears as worst on the line from a handful of checks.'],
+      ['Let the AI write the headline numbers', 'Numbers computed in code; AI only explains', '“Biggest Risk Right Now” never depends on a model, and the AI is grounded in live figures.'],
+    ],
+    testing: {
+      lede: 'Piloted on Line 10 during live production, 26 June – 4 July 2026. Eight issues surfaced on the floor; all eight were fixed and re-verified inside the window.',
+      items: [
+        ['Counters too slow', 'Entering 300–700 pieces mid-shift took too long.'],
+        ['A choice that should not exist', 'Sample size was offered as an option when policy fixes it at seven.'],
+        ['PDF ≠ screen', 'A defect code read differently in the PDF report than on screen.'],
+      ],
+      done: 'Confirmed ready for factory-wide use on 5 July 2026.',
+    },
+    process: ['Observed the paper process', 'Mapped every form', 'Worker app + admin dashboard', 'Pilot on Line 10', 'Fixed 8 floor issues', 'Ready for factory-wide use'],
     stack: ['JavaScript', 'Firebase Realtime Database', 'QR Code', 'PWA', 'Groq AI', 'AMMS integration'],
     impact: [
       { from: '70–80', to: '0', label: 'paper sheets per shift' },
@@ -149,6 +202,31 @@ export const projects = [
       'An event run by students needed to recruit volunteers across departments, run interviews and seat an audience — without spreadsheets breaking at the last minute.',
     solution:
       'One platform covers it end to end: volunteers apply and track their interview status, organisers manage departments from a dashboard, and attendees pick a seat and carry their ticket on their phone.',
+    audience: [
+      ['Attendees', 'Find the event, choose a seat and carry the ticket on their phone.'],
+      ['Volunteer applicants', 'Apply to a department and follow their interview status.'],
+      ['Department leads', 'Manage only their own team’s applicants and volunteers.'],
+      ['Organisers', 'One live view of volunteers, departments and seating.'],
+    ],
+    research: [
+      ['Several teams, one intake', 'Volunteers applied across departments, each run by its own lead.'],
+      ['Applicants needed answers', 'People waiting on interviews needed to see where they stood.'],
+      ['Seating on the day', 'The audience needed assigned seats and tickets without last-minute spreadsheet errors.'],
+      ['Everyone is on a phone', 'Visitors, volunteers and attendees all arrive on mobile, so every screen is built for it.'],
+      ['Images are heavy', 'Event and speaker images had to load fast on mobile data.'],
+    ],
+    sketch: [['Visitor', 'public site'], ['Apply / book'], ['Firebase', 'live data', 1], ['Dashboard', 'departments'], ['Seat map'], ['Ticket', 'My Tickets']],
+    options: [
+      ['Spreadsheets and separate forms', 'One live platform for every role', 'Applications, departments, seats and tickets share one source of truth.'],
+      ['Generic tickets without seats', 'A digital ticket tied to a chosen seat', 'Attendees pick their own seat on a live map and keep the ticket in My Tickets.'],
+      ['Images hosted with the site', 'Images served from Cloudinary', 'Faster loading on every phone in the audience.'],
+    ],
+    process: ['Brief from the organising team', 'Mapped the four user roles', 'Public website', 'Volunteer system', 'Seat map + tickets', 'Live for November 2025'],
+    outcome: [
+      ['Live for the event', 'Used for TEDxNIFT Jodhpur, November 2025, at apc-movie.vercel.app.'],
+      ['Six jobs, one platform', 'Website, applications, interviews, departments, seating and tickets.'],
+      ['Recommended', 'Mr. Amit Patil, Principal Design Manager at Microsoft, recommends Yasar for his contribution to TEDxNIFT Jodhpur.'],
+    ],
     stack: ['HTML', 'CSS', 'JavaScript', 'Firebase', 'Cloudinary', 'Vercel'],
     features: [
       ['Volunteer Application', 'Applications collected online, sorted by department.'],
@@ -184,6 +262,26 @@ export const projects = [
       'Sewing machines run until they visibly break. Bearing and belt wear, overheating motors and snapped needles are found only after the failure, logs live on paper if at all, and one stopped machine can leave 20–30 workers on a line sitting idle.',
     solution:
       'A retrofit, not a replacement. An Arduino Uno reads every sensor; an ESP32 listens to the machine’s own CAN bus, runs a strict safety state machine, drives an andon tower light and LCD at the machine, cuts power on overheat, and logs everything to Firebase for a live dashboard and PDF shift reports.',
+    audience: [
+      ['Operators', 'An LCD and andon light at the machine, plus needle-change and e-stop buttons.'],
+      ['Mechanics', 'Vibration and heat warnings before the machine fails.'],
+      ['Supervisors', 'The live state of every machine: running, idle, needle change, emergency, off.'],
+      ['Managers', 'True OEE and PDF shift reports, without anyone filling them in.'],
+    ],
+    research: [
+      ['Machines run to failure', 'Bearing and belt wear, overheating motors and snapped needles were found only after the failure.'],
+      ['One stop idles a line', 'A single stopped machine can leave 20–30 workers sitting idle.'],
+      ['Logs lived on paper', 'If they were kept at all, so patterns were invisible.'],
+      ['The CAN bus had no documentation', 'Raw frames were logged until the sleep-packet pattern showed when the machine was really on.'],
+      ['It had to be a retrofit', 'Nothing could touch the machine’s control logic, and the hardware had to stay under $40.'],
+    ],
+    sketch: [['Sensors', 'vibration, heat, RPM'], ['Arduino Uno', 'senses only'], ['UART', 'one CSV line'], ['ESP32', 'decides', 1], ['Andon + relay', 'at the machine'], ['Dashboard', 'Firebase']],
+    options: [
+      ['One microcontroller doing everything', 'Two boards: Uno senses, ESP32 decides', 'Keeping the Uno off the network keeps its timing perfect, so no RPM pulse is dropped.'],
+      ['A plastic DS18B20 temperature probe', 'A K-type thermocouple with a MAX6675', 'The DS18B20 cracked under vibration testing; the industrial part did not.'],
+      ['Jumper wires on a breadboard', 'One compact PCB (Phase 2)', 'The vibration GarmentFix measures also shakes the jumper wires loose.'],
+    ],
+    process: ['Studied how machines fail', 'Reverse-engineered the CAN bus', 'Breadboard prototype', 'Fitted on a running machine', 'Live dashboard + PDF reports', 'Phase 2 PCB'],
     stack: ['Arduino Uno', 'ESP32', 'C++', 'CAN bus (SN65HVD230)', 'Firebase Realtime Database', 'MPU6050', 'MAX6675 + K-type', 'DHT11'],
     scaleTitle: 'By the <span class="serif">numbers.</span>',
     scale: [

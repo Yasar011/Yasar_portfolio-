@@ -2,6 +2,7 @@ import './style.css';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
+import { chapterBar, eyebrow, researchHTML, ideationHTML, outcomeHTML, initCaseStudy } from './casestudy.js';
 import {
   person, projects, garments, photos, photoCategories, camera,
   education, experience, events, certificates, recommendations, skills,
@@ -261,10 +262,19 @@ function project() {
     </dl>
   </div></section>
 
-  <section class="sec-s" style="padding-top:clamp(24px,4vw,48px)"><div class="wrap story">
+  ${chapterBar()}
+  <section class="sec-s" id="cs-brief" style="padding-top:clamp(24px,4vw,48px)"><div class="wrap">
+    ${eyebrow(1)}
+    <div class="story">
     <div data-reveal><h2 class="t-2">The <span class="serif">problem.</span></h2><p>${p.problem}</p></div>
     <div data-reveal><h2 class="t-2">What I <span class="serif">built.</span></h2><p>${p.solution}</p></div>
+    </div>
   </div></section>
+
+  ${researchHTML(p)}
+  ${ideationHTML(p)}
+
+  <section class="cs-impact-mark" id="cs-impact"><div class="wrap">${eyebrow(4)}<p class="lede" data-reveal>The finished system, how it works, and what it changed.</p></div></section>
 
   ${p.demo ? `<section class="sec-s demo-sec"><div class="wrap">
     <div class="head"><div><h2 class="t-1" data-reveal>See it <span class="serif">in motion.</span></h2><p class="lede" data-reveal>${p.demoLede || ''}</p></div></div>
@@ -303,6 +313,8 @@ function project() {
       <span class="before"><small>Before</small>${m.from}</span><span class="arrow">${icon.arrow}</span>
       <span class="after"><small>After</small>${m.to}</span></div>`).join('')}</div>
   </div></section>` : ''}
+
+  ${outcomeHTML(p)}
 
   ${p.placement ? `<section class="sec-s"><div class="wrap">
     <div class="head"><div><h2 class="t-1" data-reveal>Where it <span class="serif">mounts.</span></h2><p class="lede" data-reveal>Nothing is wired into the machine's control logic. Every part clips on to the existing machine.</p></div></div>
@@ -610,6 +622,7 @@ if (page === 'project') {
   initDemos(reduce);
   initPCB(reduce);
   initProjectFx(reduce, D);
+  initCaseStudy({ reduce, lenis });
 }
 initTilt();
 initPlayground(reduce);

@@ -48,6 +48,11 @@ ${projects.map((p) => `* ${p.title} — ${p.full}. Role: ${p.role}. Where: ${p.w
   Stack: ${p.stack.join(', ')}
   ${p.scale ? `Scale: ${p.scale.map((s) => `${s.value} ${s.label}`).join('; ')}` : ''}
   ${p.impact ? `Impact: ${p.impact.map((m) => `${m.label}: ${m.from} → ${m.to}`).join('; ')}` : ''}
+  ${p.audience ? `Users: ${p.audience.map(([w, n]) => `${w} (${n})`).join('; ')}` : ''}
+  ${p.research ? `Research findings: ${p.research.map(([t, d]) => `${t}: ${d}`).join(' ')}` : ''}
+  ${p.options ? `Design decisions: ${p.options.map(([was, now, why]) => `considered "${was}", chose "${now}" because ${why}`).join('; ')}` : ''}
+  ${p.testing ? `Testing: ${p.testing.lede} ${p.testing.done}` : ''}
+  ${p.outcome ? `Outcome: ${p.outcome.map(([t, d]) => `${t}: ${d}`).join(' ')}` : ''}
   Features: ${p.features.map(([t, d]) => `${t} (${d})`).join('; ')}
   ${p.states ? `Safety states (priority order): ${p.states.map((s) => `${s.id}: ${s.when}`).join('; ')}` : ''}
   ${p.lessons ? `Lessons learned: ${p.lessons.map(([t, d]) => `${t}: ${d}`).join(' ')}` : ''}
