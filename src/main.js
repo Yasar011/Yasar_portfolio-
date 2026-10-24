@@ -73,7 +73,7 @@ const here = (h) => {
   const p = location.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/';
   return p === h || (h === '/work' && page === 'project');
 };
-const socialIcon = { GitHub: icon.github, LinkedIn: icon.linkedin, Instagram: icon.instagram };
+const socialIcon = { GitHub: icon.github, LinkedIn: icon.linkedin, Instagram: icon.instagram, Behance: sv('<path d="M3 6h5.5a2.5 2.5 0 0 1 0 5H3zM3 11h6a3 3 0 0 1 0 6H3zM15 7h5M14 14h7a3.5 3.5 0 1 0-1 3"/>', 1.6) };
 
 function chrome() {
   const nav = document.createElement('header');

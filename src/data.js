@@ -22,6 +22,7 @@ export const person = {
     { label: 'GitHub', handle: 'Yasar011', href: 'https://github.com/Yasar011' },
     { label: 'LinkedIn', handle: 'yasar-c-h', href: 'https://www.linkedin.com/in/yasar-c-h-78131b2b6/' },
     { label: 'Instagram', handle: '_y_asar_', href: 'https://www.instagram.com/_y_asar_/' },
+    { label: 'Behance', handle: 'beatshub', href: 'https://www.behance.net/beatshub' },
   ],
 };
 
