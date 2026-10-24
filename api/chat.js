@@ -24,7 +24,7 @@ async function chooseModels(provider) {
   const ranked = [...new Set(PREFER.map((re) => ids.find((id) => re.test(id))).filter(Boolean))];
   const list = (ranked.length ? ranked : ids).slice(0, 6);
   if (!list.length) throw new Error('no chat models available');
-  console.log('AI models', list.join(', '));
+  console.log('AI models', list.join(', '), '| available:', ids.join(', '));
   modelCache[provider.id] = list;
   return list;
 }
