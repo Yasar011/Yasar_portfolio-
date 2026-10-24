@@ -10,8 +10,8 @@ const PROVIDERS = {
   xai: { base: 'https://api.x.ai/v1', key: 'XAI_API_KEY' },
 };
 // Providers retire models often, so pick the best chat model they currently offer (AI_MODEL overrides).
-const PREFER = [/gpt-oss-120b/, /llama-4-maverick/, /llama-3\.3-70b/, /kimi-k2/, /qwen3?-32b/, /llama-4-scout/, /grok-4/, /grok-3/, /70b/, /gpt-oss/, /grok/, /llama/];
-const NOT_CHAT = /whisper|guard|tts|embed|vision-only|image|audio|playai|distil|prompt-guard/i;
+const PREFER = [/gpt-oss-120b/, /llama-4-maverick/, /llama-3\.3-70b/, /kimi-k2/, /qwen3?-32b/, /llama-4-scout/, /grok-4/, /grok-3/, /70b/, /gpt-oss-20b/, /qwen/, /gpt-oss/, /grok/, /llama/];
+const NOT_CHAT = /whisper|guard|tts|embed|vision-only|image|audio|playai|orpheus|allam|distil|prompt-guard/i;
 const modelCache = {};
 // Best model first, then fallbacks: free tiers have small per-minute token limits,
 // so a busy (429) model hands the question to the next one instead of failing.
@@ -24,7 +24,6 @@ async function chooseModels(provider) {
   const ranked = [...new Set(PREFER.map((re) => ids.find((id) => re.test(id))).filter(Boolean))];
   const list = (ranked.length ? ranked : ids).slice(0, 6);
   if (!list.length) throw new Error('no chat models available');
-  console.log('AI models', list.join(', '), '| available:', ids.join(', '));
   modelCache[provider.id] = list;
   return list;
 }
@@ -185,10 +184,10 @@ export default async function handler(req, res) {
       model,
       messages: [{ role: 'system', content: systemFor(messages) }, ...messages],
       temperature: 0.3,
-      max_tokens: 600,
+      max_tokens: 450,
       stream: true,
       // Reasoning models spend tokens thinking; keep that short for a snappy chat
-      ...(/gpt-oss/.test(model) ? { reasoning_effort: 'low' } : {}),
+      ...(/gpt-oss/.test(model) ? { reasoning_effort: 'low' } : /qwen/.test(model) ? { reasoning_format: 'hidden' } : {}),
     }),
   });
   let upstream;
@@ -205,7 +204,7 @@ export default async function handler(req, res) {
         continue;
       }
       // Busy, too large or down: hand the question to the next model
-      if (![429, 413, 500, 502, 503].includes(upstream.status)) break;
+      if (![400, 413, 429, 500, 502, 503].includes(upstream.status)) break;
       console.warn('AI model unavailable, trying next', models[k], upstream.status);
     }
   } catch (err) {
