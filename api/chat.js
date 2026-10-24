@@ -22,7 +22,7 @@ async function chooseModels(provider) {
   if (!r.ok) throw new Error(`models ${r.status} ${await r.text().catch(() => '')}`);
   const ids = ((await r.json()).data || []).map((m) => m.id).filter((id) => !NOT_CHAT.test(id));
   const ranked = [...new Set(PREFER.map((re) => ids.find((id) => re.test(id))).filter(Boolean))];
-  const list = (ranked.length ? ranked : ids).slice(0, 4);
+  const list = (ranked.length ? ranked : ids).slice(0, 6);
   if (!list.length) throw new Error('no chat models available');
   modelCache[provider.id] = list;
   return list;
@@ -34,6 +34,42 @@ const RATE = { windowMs: 60_000, max: 12 };
 const hits = new Map(); // best-effort per-instance rate limit
 
 const list = (xs) => xs.map((x) => `- ${x}`).join('\n');
+const projectBrief = (p) => `* ${p.title} (${p.full}): ${p.summary} Role: ${p.role}, ${p.where}. Page: /project?id=${p.id}${p.live ? ` · Live: ${p.live}` : ''}`;
+const projectDetail = (p) => [
+  `DETAILS: ${p.title} (${p.full})`,
+  `Problem: ${p.problem}`,
+  `What he built: ${p.solution}`,
+  `Stack: ${p.stack.join(', ')}`,
+  p.scale && `Scale: ${p.scale.map((s) => `${s.value} ${s.label}`).join('; ')}`,
+  p.impact && `Impact: ${p.impact.map((m) => `${m.label}: ${m.from} → ${m.to}`).join('; ')}`,
+  p.audience && `Users: ${p.audience.map(([w, n]) => `${w} (${n})`).join('; ')}`,
+  p.research && `Research findings: ${p.research.map(([t, d]) => `${t}: ${d}`).join(' ')}`,
+  p.researchNote,
+  p.options && `Design decisions: ${p.options.map(([was, now, why]) => `considered "${was}", chose "${now}" because ${why}`).join('; ')}`,
+  p.process && `Process: ${p.process.join(' → ')}`,
+  p.testing && `Testing: ${p.testing.lede} ${p.testing.items.map(([t, d]) => `${t}: ${d}`).join(' ')} ${p.testing.done}`,
+  p.outcome && `Outcome: ${p.outcome.map(([t, d]) => `${t}: ${d}`).join(' ')}`,
+  `Features: ${p.features.map(([t, d]) => `${t} (${d})`).join('; ')}`,
+  p.states && `Safety states (priority order): ${p.states.map((s) => `${s.id}: ${s.when}`).join('; ')}`,
+  p.lessons && `Lessons learned: ${p.lessons.map(([t, d]) => `${t}: ${d}`).join(' ')}`,
+  p.status && `Status: ${p.status.map((s) => `${s.label}: ${s.items.join(', ')}`).join('. ')}`,
+  p.future && `Next: ${p.future.map(([t, d]) => `${t}: ${d}`).join(' ')}`,
+  p.floor && 'Deployed and in daily use on the Brandix Unit 3 sewing floor: QC staff log checks on phones, machines carry QR codes, and Yasar reviewed the analytics dashboard with the factory team.',
+].filter(Boolean).join('\n  ');
+
+// Words that pull a project's full details into the prompt, so each request stays small
+const TOPICS = {
+  apms: /apms|breakdown|maintenance|problem management|mechanic|technician|changeover|spare/i,
+  'garmentfix-qms': /qms|quality|defect|inspect|red operator|pilot|cpa|audit|paper/i,
+  'smart-monitoring': /monitor|iot|sensor|esp32|arduino|can ?bus|vibration|temperature|andon|pcb|retrofit|hardware/i,
+  'tedx-nift-jodhpur': /tedx|event platform|volunteer|ticket|seat/i,
+};
+function relevantProjects(messages) {
+  const text = messages.filter((m) => m.role === 'user').slice(-3).map((m) => m.content).join(' ');
+  const hit = projects.filter((p) => TOPICS[p.id]?.test(text));
+  if (!hit.length && /brandix|intern|factory|garmentfix/i.test(text)) return projects.filter((p) => p.id === 'apms' || p.id === 'garmentfix-qms');
+  return hit.slice(0, 2);
+}
 const knowledge = `
 NAME: ${person.name}
 TAGLINE: ${person.tagline.join(' × ')}
@@ -43,25 +79,8 @@ LANGUAGES: ${languages.join(', ')}
 ABOUT: ${person.about}
 CONTACT: email ${person.email}; ${person.socials.map((s) => `${s.label} ${s.href}`).join('; ')}. CV (PDF) can be downloaded on the site at /cv.
 
-PROJECTS:
-${projects.map((p) => `* ${p.title} — ${p.full}. Role: ${p.role}. Where: ${p.where}.
-  Summary: ${p.summary}
-  Problem: ${p.problem}
-  What he built: ${p.solution}
-  Stack: ${p.stack.join(', ')}
-  ${p.scale ? `Scale: ${p.scale.map((s) => `${s.value} ${s.label}`).join('; ')}` : ''}
-  ${p.impact ? `Impact: ${p.impact.map((m) => `${m.label}: ${m.from} → ${m.to}`).join('; ')}` : ''}
-  ${p.audience ? `Users: ${p.audience.map(([w, n]) => `${w} (${n})`).join('; ')}` : ''}
-  ${p.research ? `Research findings: ${p.research.map(([t, d]) => `${t}: ${d}`).join(' ')}` : ''}
-  ${p.options ? `Design decisions: ${p.options.map(([was, now, why]) => `considered "${was}", chose "${now}" because ${why}`).join('; ')}` : ''}
-  ${p.testing ? `Testing: ${p.testing.lede} ${p.testing.done}` : ''}
-  ${p.outcome ? `Outcome: ${p.outcome.map(([t, d]) => `${t}: ${d}`).join(' ')}` : ''}
-  Features: ${p.features.map(([t, d]) => `${t} (${d})`).join('; ')}
-  ${p.states ? `Safety states (priority order): ${p.states.map((s) => `${s.id}: ${s.when}`).join('; ')}` : ''}
-  ${p.lessons ? `Lessons learned: ${p.lessons.map(([t, d]) => `${t}: ${d}`).join(' ')}` : ''}
-  ${p.status ? `Status: ${p.status.map((s) => `${s.label}: ${s.items.join(', ')}`).join('. ')}` : ''}
-  ${p.floor ? 'Deployed and in daily use on the Brandix Unit 3 sewing floor: QC staff log checks on phones, machines carry QR codes, and Yasar reviewed the analytics dashboard with the factory team.' : ''}
-  Page: /project?id=${p.id}${p.live ? ` · Live site: ${p.live}` : ''}`).join('\n')}
+PROJECTS (one line each; full details follow below when a visitor asks about one):
+${projects.map(projectBrief).join('\n')}
 
 EXPERIENCE:
 ${list(experience.map((x) => `${x.org} — ${x.role} (${x.when}). ${x.body}`))}
@@ -85,7 +104,7 @@ LETTERS OF RECOMMENDATION:
 ${list(recommendations.map((r) => `${r.name}, ${r.title}: ${r.about}`))}
 `.trim();
 
-const SYSTEM = `You are the assistant on Yasar C H's portfolio website. Visitors are mostly recruiters, studios and collaborators.
+const RULES = `You are the assistant on Yasar C H's portfolio website. Visitors are mostly recruiters, studios and collaborators.
 
 Answer questions about Yasar using ONLY the facts below. Speak about him in the third person ("Yasar built…"), warmly and professionally.
 - Keep answers short: 1–4 sentences, or a few bullet points for lists.
@@ -104,6 +123,7 @@ PERSONALITY:
 
 FACTS ABOUT YASAR:
 ${knowledge}`;
+const systemFor = (messages) => [RULES, ...relevantProjects(messages).map(projectDetail)].join('\n\n');
 
 function pickProvider() {
   const forced = process.env.AI_PROVIDER;
@@ -162,7 +182,7 @@ export default async function handler(req, res) {
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${provider.apiKey}` },
     body: JSON.stringify({
       model,
-      messages: [{ role: 'system', content: SYSTEM }, ...messages],
+      messages: [{ role: 'system', content: systemFor(messages) }, ...messages],
       temperature: 0.3,
       max_tokens: 600,
       stream: true,
