@@ -2,6 +2,7 @@ import './style.css';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
+import { cinematicIntro, INTRO_HOLD } from './intro.js';
 import { chapterBar, eyebrow, researchHTML, ideationHTML, outcomeHTML, initCaseStudy } from './casestudy.js';
 import {
   person, projects, garments, photos, photoCategories, camera,
@@ -22,13 +23,16 @@ document.documentElement.classList.add('js');
 if (reduce) document.documentElement.classList.add('reduced');
 const page = document.body.dataset.page;
 
-// Every fresh load or refresh plays the stitched loader; moving between pages plays a short cut transition.
+// The first load of a visit plays the cinematic intro; refreshes get a quick silk lift; moving between pages plays a short cut transition.
 let arrive = null;
 let arriveKind = null;
 try { arrive = sessionStorage.getItem('pt'); arriveKind = sessionStorage.getItem('ptk'); sessionStorage.removeItem('pt'); sessionStorage.removeItem('ptk'); sessionStorage.removeItem('intro'); } catch (e) { /* storage blocked */ }
-const showIntro = !reduce && !arrive;
+let seen = false;
+try { seen = sessionStorage.getItem('seen') === '1'; } catch (e) { /* storage blocked */ }
+const showIntro = !reduce && !arrive && !seen;
+const showRefresh = !reduce && !arrive && seen;
 const showArrive = !reduce && !!arrive;
-const D = showIntro ? 3.55 : showArrive ? (arriveKind ? 0.75 : 0.55) : 0; // delay hero entrance until the curtain lifts
+const D = showIntro ? INTRO_HOLD : showArrive ? (arriveKind ? 0.75 : 0.55) : showRefresh ? 0.55 : 0; // delay hero entrance until the curtain lifts
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const pad = (n) => String(n).padStart(2, '0');
@@ -89,6 +93,7 @@ function chrome() {
   drawer.className = 'drawer'; drawer.id = 'drawer';
   drawer.innerHTML = `<ol>${[['Home', '/'], ...links].map(([l, h]) => `<li><a href="${h}">${l}</a></li>`).join('')}</ol>
     <a class="btn" href="${person.cv}" download style="align-self:flex-start;margin-top:24px">${icon.download} Download CV</a>
+    <a class="btn btn--line" href="${person.portfolio}" download style="align-self:flex-start;margin-top:10px">${icon.download} Portfolio (PDF)</a>
     <div class="drawer-foot">${person.socials.map((s) => `<a href="${s.href}" target="_blank" rel="noopener">${s.label}</a>`).join('')}</div>`;
   const thread = document.createElement('div');
   thread.className = 'thread'; thread.setAttribute('aria-hidden', 'true');
@@ -112,7 +117,7 @@ function chrome() {
   foot.innerHTML = page === 'contact' ? `<div class="wrap"><div class="foot-base"><span>© ${new Date().getFullYear()} Yasar C H · ${person.signoff}</span><a href="#top">Back to top ↑</a></div></div>` : `<div class="wrap">
     <h2 class="t-hero" data-reveal>Let's make<br>something <span class="serif">good.</span></h2>
     <p class="lede" data-reveal>Internships, collaborations, shoots or a factory floor that still runs on paper — I'd love to hear about it.</p>
-    <div class="ctas" data-reveal><a class="btn" href="mailto:${person.email}">${icon.mail} ${person.email}</a><a class="link" href="${person.cv}" download><span>Download my CV</span>${icon.download}</a></div>
+    <div class="ctas" data-reveal><a class="btn" href="mailto:${person.email}">${icon.mail} ${person.email}</a><a class="link" href="${person.cv}" download><span>Download my CV</span>${icon.download}</a><a class="link" href="${person.portfolio}" download><span>Portfolio PDF</span>${icon.download}</a></div>
     <div class="socials" data-reveal>${person.socials.map((s) => `<a class="social" href="${s.href}" target="_blank" rel="noopener"><i>${socialIcon[s.label]}</i><span><b>${s.label}</b><span>@${s.handle}</span></span></a>`).join('')}</div>
     <div class="foot-base"><span>© ${new Date().getFullYear()} Yasar C H · ${person.signoff}</span><a href="#top">Back to top ↑</a></div>
   </div>`;
@@ -150,7 +155,7 @@ function home() {
       <p class="hello serif" data-reveal>Hi, I'm</p>
       <h1 class="me-name" aria-label="Yasar C H"><span class="ln"><span>Yasar</span></span><span class="ln"><span>C H<i class="accent">.</i></span></span></h1>
       <p class="me-role" data-reveal>Fashion Technology student at NIFT Jodhpur, and a <span class="rotator"><span class="rot-track">${[...roles, roles[0]].map((r) => `<span>${r}</span>`).join('')}</span></span></p>
-      <div class="ctas" data-reveal><a class="btn" href="/work" data-cursor="Work">View my work ${icon.arrow}</a><a class="btn btn--line" href="${person.cv}" download>${icon.download} Download CV</a></div>
+      <div class="ctas" data-reveal><a class="btn" href="/work" data-cursor="Work">View my work ${icon.arrow}</a><a class="btn btn--line" href="${person.portfolio}" download>${icon.download} Portfolio (PDF)</a><a class="link" href="${person.cv}" download><span>Download CV</span>${icon.download}</a></div>
       <ul class="me-meta" data-reveal><li><span class="dot"></span>${person.degree} · ${person.semester}</li><li>Perinthalmanna, Kerala → Jodhpur</li></ul>
     </div>
     <div class="me-photo" data-reveal>
@@ -228,6 +233,7 @@ function work() {
     ${crumbs('Work')}
     <h1 class="t-hero" data-reveal>The <span class="serif">work.</span></h1>
     <p class="lede" data-reveal>Systems built for a working apparel factory, a full event platform for TEDx, and machines that report on themselves.</p>
+    <div class="ctas" style="margin-top:28px" data-reveal><a class="btn" href="${person.portfolio}" download>${icon.download} Download portfolio (PDF)</a><span class="dim" style="font-size:14px">15 pages · all four case studies</span></div>
   </div></section>
   <section style="padding-bottom:clamp(96px,12vw,160px)"><div class="wrap"><div class="w-grid">
     ${projects.map((p, i) => `<a class="w-card" href="/project?id=${p.id}" data-reveal data-cursor="View"${p.accent ? ` style="--thread:${p.accent[0]};--thread-2:${p.accent[1]}"` : ''}>
@@ -490,6 +496,7 @@ function cv() {
     <p class="lede" data-reveal>Everything on one page: education, experience, skills and tools. Read it here, or take the PDF with you.</p>
     <div class="ctas" style="margin-top:36px" data-reveal>
       <a class="btn" href="${person.cv}" download>${icon.download} Download CV (PDF)</a>
+      <a class="btn btn--line" href="${person.portfolio}" download>${icon.download} Portfolio (PDF)</a>
       <a class="link" href="${person.cv}" target="_blank" rel="noopener"><span>Open in a new tab</span>${icon.out}</a>
     </div>
   </div></section>
@@ -587,6 +594,7 @@ function contact() {
       </div>
       <div class="ct-card ct-quick" data-reveal>
         <a class="btn" href="${person.cv}" download>${icon.download} Download CV</a>
+        <a class="btn btn--line" href="${person.portfolio}" download>${icon.download} Portfolio (PDF)</a>
         <button class="btn btn--line ct-ask" type="button">Ask my AI assistant</button>
       </div>
     </aside>
@@ -963,55 +971,10 @@ function lift(el, at) {
 }
 
 if (showIntro) {
-  // Intro: the name lands in light, the camera dives into the "y" monogram,
-  // and it bursts into coloured threads that weave a fabric, which then pulls apart onto the page.
-  const NAME = 'Yasar C H';
-  const COLORS = ['#3a2cf5', '#6c61ff', '#9b7bff', '#c13bff', '#ff4f8b', '#ff8a5c', '#19c8ff', '#7cf2d0'];
-  const nf = document.createElement('div');
-  nf.className = 'nf';
-  nf.setAttribute('aria-hidden', 'true');
-  nf.innerHTML = `<div class="nf-warp">${Array.from({ length: 30 }, () => '<i></i>').join('')}</div>
-    <div class="nf-weft">${Array.from({ length: 18 }, () => '<i></i>').join('')}</div>
-    <div class="nf-word"><span class="nf-mark">y</span>${[...NAME].map((c) => (c === ' ' ? '<span class="nf-sp"></span>' : `<span class="nf-ch">${c}</span>`)).join('')}</div>
-    <div class="nf-sub">Fashion · Technology · Photography</div>`;
-  document.body.append(nf);
-  lenis?.stop();
-
-  const word = $('.nf-word', nf), mark = $('.nf-mark', nf), chars = $$('.nf-ch', nf), sub = $('.nf-sub', nf);
-  const warp = $$('.nf-warp i', nf), weft = $$('.nf-weft i', nf);
-  const paint = (el, i, dir, n) => {
-    const c = COLORS[i % COLORS.length], c2 = COLORS[(i * 5 + 2) % COLORS.length], th = 0.5 + ((i * 37) % 10) / 6;
-    el.style[dir === 'v' ? 'width' : 'height'] = `${th}${dir === 'v' ? 'vw' : 'vh'}`;
-    el.style[dir === 'v' ? 'left' : 'top'] = `${(i + 0.5) * (100 / n)}%`;
-    el.style.background = `linear-gradient(${dir === 'v' ? 180 : 90}deg, transparent, ${c} 18%, ${c2} 50%, ${c} 82%, transparent)`;
-  };
-  warp.forEach((el, i) => paint(el, i, 'v', warp.length));
-  weft.forEach((el, i) => paint(el, i, 'h', weft.length));
-  gsap.set([word, ...warp, ...weft], { force3D: true });
-
-  // Origin of the zoom: the centre of the "y"
-  const origin = () => { const r = mark.getBoundingClientRect(), w = word.getBoundingClientRect(); return `${r.left - w.left + r.width / 2}px ${r.top - w.top + r.height * 0.5}px`; };
-
-  gsap.timeline({ defaults: { ease: 'power2.out' }, onComplete: () => { nf.remove(); lenis?.start(); } })
-    // 1. Monogram and name glide in together
-    .fromTo(mark, { opacity: 0, scale: 0.6, rotate: -12 }, { opacity: 1, scale: 1, rotate: 0, duration: 1.1, ease: 'expo.out' }, 0)
-    .fromTo(chars, { opacity: 0, yPercent: 40 }, { opacity: 1, yPercent: 0, duration: 1.1, ease: 'expo.out', stagger: 0.045 }, 0.15)
-    .fromTo(sub, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 1, ease: 'expo.out' }, 0.55)
-    // 2. Gentle push-in with a light sweep
-    .fromTo(word, { scale: 1 }, { scale: 1.06, duration: 1.4, ease: 'sine.inOut' }, 0.4)
-    .fromTo(word, { '--sx': '-30%' }, { '--sx': '130%', duration: 1.0, ease: 'sine.inOut' }, 0.9)
-    // 3. Name and subtitle fade as the camera eases into the "y"
-    .to([...chars, sub], { opacity: 0, duration: 0.6, ease: 'sine.inOut', stagger: { each: 0.025, from: 'end' } }, 1.75)
-    .set(word, { transformOrigin: origin }, 1.8)
-    .to(word, { scale: 14, duration: 1.2, ease: 'expo.in' }, 1.85)
-    .to(mark, { opacity: 0, duration: 0.45, ease: 'sine.in' }, 2.6)
-    // 4. Threads grow out while the zoom finishes, weaving a fabric
-    .fromTo(warp, { scaleY: 0, opacity: 0 }, { scaleY: 1, opacity: 1, duration: 0.9, ease: 'expo.out', stagger: { each: 0.012, from: 'center' } }, 2.45)
-    .fromTo(weft, { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 0.85, duration: 0.9, ease: 'expo.out', stagger: { each: 0.018, from: 'center' } }, 2.55)
-    // 5. The fabric parts and fades onto the page
-    .to(warp, { yPercent: (i) => (i % 2 ? -110 : 110), duration: 0.9, ease: 'power2.inOut', stagger: { each: 0.008, from: 'center' } }, 3.15)
-    .to(weft, { xPercent: (i) => (i % 2 ? -110 : 110), duration: 0.9, ease: 'power2.inOut', stagger: { each: 0.012, from: 'center' } }, 3.15)
-    .to(nf, { backgroundColor: 'rgba(5,5,10,0)', duration: 0.25, ease: 'sine.in' }, 3.05);
+  try { sessionStorage.setItem('seen', '1'); } catch (e) { /* storage blocked */ }
+  cinematicIntro({ lenis });
+} else if (showRefresh) {
+  lift(veil(`<b class="pt-label">${flowLetters('Yasar C H')}</b>`, true), 0.05);
 }
 
 // Arriving from another page: the silk that covered the old page lifts off this one

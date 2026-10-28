@@ -77,7 +77,7 @@ STUDY: ${person.degree} (BFT) at ${person.school}, ${person.years}. Minor: ${per
 FROM: ${person.location}
 LANGUAGES: ${languages.join(', ')}
 ABOUT: ${person.about}
-CONTACT: email ${person.email}; ${person.socials.map((s) => `${s.label} ${s.href}`).join('; ')}. CV (PDF) can be downloaded on the site at /cv.
+CONTACT: email ${person.email}; ${person.socials.map((s) => `${s.label} ${s.href}`).join('; ')}. CV (PDF) can be downloaded on the site at /cv. A 15-page portfolio PDF with all four case studies is at ${person.portfolio} (buttons on /work, /cv, /contact and the home page).
 
 PROJECTS (one line each; full details follow below when a visitor asks about one):
 ${projects.map(projectBrief).join('\n')}

@@ -16,6 +16,7 @@ export const person = {
   email: 'chyasar2004@gmail.com',
   location: 'Perinthalmanna, Kerala · NIFT Jodhpur',
   cv: '/Yasar_CH_CV.pdf',
+  portfolio: '/Yasar_CH_Portfolio.pdf',
   portrait: '/images/portrait.jpg',
   portraitAlt: '/images/portrait-2.jpg',
   socials: [
