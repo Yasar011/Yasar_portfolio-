@@ -408,6 +408,8 @@ const p = (cat, n, ratio, cap) => ({ cat, src: `/images/photography/${cat.toLowe
 export const photos = [
   p('Fashion', 1, '3/2'),
   p('Fashion', 2, '2/3'),
+  // Old Hollywood fashion shoot: lace gloves, pearls, a floral fan and a red rose among the auditorium seats
+  ...[3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21].map((n) => p('Fashion', n, n === 6 || n === 17 ? '3/2' : '2/3', 'Old Hollywood shoot')),
   p('Product', 1, '1/1'),
   p('Product', 4, '3/2'),
   p('Product', 2, '1/1'),

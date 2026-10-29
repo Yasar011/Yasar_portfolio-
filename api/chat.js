@@ -91,7 +91,7 @@ ${list(education.map((e) => `${e.place}${e.years ? ` (${e.years})` : ''}: ${e.wh
 GARMENTS HE MADE:
 ${list(garments.map((g) => `${g.title}: ${g.note} — ${g.steps.join(', ')}${g.details ? `. Design details: ${g.details.join(', ')}` : ''}`))}
 
-PHOTOGRAPHY: ${photoCategories.join(', ')}. Brand work: product and lookbook photography for The Artsy Harbour, a bag startup. Event work: photographed the Silent Disco event for NEWME Jodhpur (fashion brand store). Camera ${camera.body} with ${camera.lens}.
+PHOTOGRAPHY: ${photoCategories.join(', ')}. Brand work: product and lookbook photography for The Artsy Harbour, a bag startup. Event work: photographed the Silent Disco event for NEWME Jodhpur (fashion brand store). Fashion work includes an Old Hollywood styled shoot (lace gloves, pearls, a floral fan and a red rose, among auditorium seats). Camera ${camera.body} with ${camera.lens}.
 PINNED / CORE SKILL: ${person.pinned}. He automates factory work through IoT (sensors and machines that act on their own, e.g. the Smart Monitoring power cut and andon light), AI (the Groq-powered QMS bot and this portfolio assistant) and software (APMS QR tickets auto-routed to engineers, QMS reports that build themselves).
 WHAT HE DOES: ${focusAreas.join(', ')}
 SKILLS:
