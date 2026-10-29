@@ -14,7 +14,6 @@ import { wiringSVG, statesHTML, initMonitor } from './monitor.js';
 import { demoHTML, initDemos, pcbSVG, initPCB, initProjectFx, initTilt } from './fx.js';
 import { projectKind, cover as themedCover, reveal as themedReveal } from './transitions.js';
 import { pageKind, pageCover, pageReveal, initPageFx, resetPageTransform } from './pagefx.js';
-import { playgroundHTML, initPlayground } from './automate.js';
 import { mini } from './mini.js';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -190,8 +189,6 @@ function home() {
         ['Software', 'Route & report', 'A QR scan becomes a ticket that reaches the right engineer in seconds; reports build themselves.', 'APMS', '/project?id=apms', 'sw'],
       ].map(([k, sub, d, proj, href, c]) => `<a class="pillar pillar-${c}" href="${href}" data-reveal><span class="pillar-k">${k}</span><b>${sub}</b><p>${d}</p><span class="link"><span>${proj}</span>${icon.arrow}</span></a>`).join('')}
     </div>
-    <div class="pg-head"><h3 class="t-2" data-reveal>Try it <span class="serif">yourself.</span></h3><p class="dim" data-reveal>Push the sliders, press the e-stop, or hit Chaos mode, and watch the automation react.</p></div>
-    <div data-reveal>${playgroundHTML()}</div>
   </div></section>
 
   <section class="sec on-white" style="padding-bottom:clamp(64px,8vw,110px)"><div class="wrap">
@@ -633,7 +630,6 @@ if (page === 'project') {
   initCaseStudy({ reduce, lenis });
 }
 initTilt();
-initPlayground(reduce);
 
 /* ---------- Nav + thread ---------- */
 const navEl = $('.nav'), sewn = $('.thread .sewn'), needle = $('.thread .needle'), threadEl = $('.thread');
